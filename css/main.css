@@ -97,6 +97,10 @@
     box-sizing: border-box;
 }
 
+ul {
+    list-style: none;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-primary);
@@ -112,7 +116,7 @@ body {
 
 .app-container {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     display: flex;
     min-width: 800px;
     min-height: 600px;
@@ -358,7 +362,7 @@ body {
     background-color: var(--bg-tertiary);
 }
 
-.song-info {
+.player .song-info {
     display: flex;
     align-items: center;
     gap: 15px;
@@ -412,7 +416,7 @@ body {
 /* 右侧顶部 */
 .main-content .top-bar {
     display: flex;
-    position: absolute;
+    position: relative;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
@@ -735,6 +739,104 @@ body {
     opacity: 1;
 }
 
+
+/* 用户信息小框 */
+
+.user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    box-shadow: 0 3px 10px var(--shadow-color);
+    width: 160px;
+    padding: 10px;
+    overflow: hidden;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-menu img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.user-menu div {
+    width: 100%;
+    
+}
+
+.user-menu .avator {
+    display: flex;
+    justify-content: center;
+}
+
+.user-menu .user-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: center;
+}
+
+.user-menu .user-email{
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: center;
+}
+
+.user-menu .logout {
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+}
+
+.user-menu .logout:hover {
+    background-color: var(--accent-hover);
+}
+
+.user-menu .logout span{
+    color: white;
+}
+
+.user-menu span {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.user-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
 /* 播放器样式 */
 .player {
     position: fixed;
@@ -746,7 +848,6 @@ body {
     border-top: 1px solid var(--border-color);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
     z-index: 900;
-    padding: 0 20px;
     transition: all 0.3s ease;
 }
 
@@ -757,6 +858,7 @@ body {
     min-width: 280px;
     padding-right: 20px;
     border-right: 1px solid var(--border-color);
+    padding-left: 20px;
 }
 
 .cover-container {
@@ -782,8 +884,13 @@ body {
 }
 
 @keyframes rotateAnimation {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .playing-indicator {
@@ -800,7 +907,7 @@ body {
     transition: opacity 0.2s ease;
 }
 
-.music-cover:hover + .playing-indicator,
+.music-cover:hover+.playing-indicator,
 .playing-indicator:hover {
     opacity: 1;
 }
@@ -815,14 +922,32 @@ body {
     animation: soundBars 1.2s ease-in-out infinite;
 }
 
-.playing-indicator span:nth-child(1) { animation-delay: 0s; }
-.playing-indicator span:nth-child(2) { animation-delay: 0.3s; }
-.playing-indicator span:nth-child(3) { animation-delay: 0.6s; }
-.playing-indicator span:nth-child(4) { animation-delay: 0.9s; }
+.playing-indicator span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.playing-indicator span:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.playing-indicator span:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.playing-indicator span:nth-child(4) {
+    animation-delay: 0.9s;
+}
 
 @keyframes soundBars {
-    0%, 100% { height: 3px; }
-    50% { height: 12px; }
+
+    0%,
+    100% {
+        height: 3px;
+    }
+
+    50% {
+        height: 12px;
+    }
 }
 
 .music-details {
@@ -884,6 +1009,7 @@ body {
     justify-content: center;
     padding: 12px 0;
     position: relative;
+    padding-right: 20px;
 }
 
 .player-controls {
@@ -985,7 +1111,8 @@ body {
     background-color: var(--text-tertiary);
     opacity: 0.3;
     border-radius: 2px;
-    width: 60%; /* 这个宽度将由JS动态控制 */
+    width: 60%;
+    /* 这个宽度将由JS动态控制 */
 }
 
 .progress {
@@ -993,13 +1120,15 @@ body {
     height: 100%;
     background-color: var(--accent-primary);
     border-radius: 2px;
-    width: 30%; /* 这个宽度将由JS动态控制 */
+    width: 30%;
+    /* 这个宽度将由JS动态控制 */
 }
 
 .progress-handle {
     position: absolute;
     top: 50%;
-    left: 30%; /* 这个位置将由JS动态控制 */
+    left: 30%;
+    /* 这个位置将由JS动态控制 */
     transform: translate(-50%, -50%);
     width: 12px;
     height: 12px;
@@ -1058,7 +1187,8 @@ body {
 
 .volume-level {
     height: 100%;
-    width: 70%; /* 这个宽度将由JS动态控制 */
+    width: 70%;
+    /* 这个宽度将由JS动态控制 */
     background-color: var(--accent-primary);
     border-radius: 2px;
 }
@@ -1066,7 +1196,8 @@ body {
 .volume-handle {
     position: absolute;
     top: 50%;
-    left: 70%; /* 这个位置将由JS动态控制 */
+    left: 70%;
+    /* 这个位置将由JS动态控制 */
     transform: translate(-50%, -50%);
     width: 10px;
     height: 10px;
@@ -1080,3 +1211,593 @@ body {
     opacity: 1;
 }
 
+.playlist {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: 400px;
+    background-color: var(--bg-tertiary);
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    transform: translateY(-50%);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: opacity 0.2s ease, right 0.2s ease;
+    position: absolute;
+    bottom: 140px;
+    right: -300px;
+    opacity: 0;
+    transform: translateY(10px);
+    z-index: 899;
+    overflow: hidden;
+}
+
+.playlist.show {
+    opacity: 1;
+    right: 0px;
+}
+
+.play-list-content {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent;
+}
+
+
+.song-items {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--bg-primary);
+    height: 80px;
+    align-items: center;
+    position: relative;
+}
+
+.song-items:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.song-items img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    display: flex;
+}
+
+.song-items .song-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    font-weight: 500;
+    font-size: 11px;
+}
+
+.song-items .song-info span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100px;
+}
+
+.song-items .song-info span:first-child {
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.song-items .duration {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+}
+
+.song-items .delete {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.song-items .delete svg {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-self: center;
+    align-self: center;
+}
+
+/* mainContentArea部分 */
+
+.mainContentArea {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    scrollbar-width: thin;
+    padding-bottom: 80px;
+    scrollbar-color: var(--accent-primary) transparent;
+}
+
+/* classify */
+
+.classify {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--bg-primary);
+    height: 80px;
+    align-items: center;
+    position: relative;
+}
+
+.classify ul {
+    display: flex;
+    gap: 10px;
+}
+
+.singerClassification {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--bg-primary);
+    height: 80px;
+    align-items: center;
+    position: relative;
+}
+
+.singerClassification ul {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.singerClassification ul li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    min-width: 80px;
+    text-align: center;
+}
+
+.singerClassification ul li:hover {
+    background-color: var(--accent-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+.singerClassification .devide {
+    width: 3px;
+    height: 30px;
+    background-color: var(--border-color);
+}
+
+.singerClassification ul li.active {
+    background-color: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-hover);
+}
+
+/* classified-singer展示样式 */
+/* singer */
+
+.classified-singer {
+    width: 100%;
+    display: grid;
+    place-items: center;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 3px solid var(--border-color);
+}
+
+.singer-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--bg-primary);
+    height: 150px;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.singer-items img {
+    width: 100px;
+    height: 100px;
+    border-radius: 5px;
+    object-fit: cover;
+    display: flex;
+}
+
+/* 歌手详情页样式 */
+.artist-detail {
+    padding: 20px;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background-color: var(--bg-tertiary);
+    border-radius: 20px;
+    width: fit-content;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.2s ease;
+}
+
+.back-button:hover {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.artist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.artist-header h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.play-all-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.play-all-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+.songs-table {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--bg-tertiary);
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr 100px;
+    padding: 12px 20px;
+    background-color: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.song-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr 100px;
+    padding: 10px 20px;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.song-row:hover {
+    background-color: var(--bg-secondary);
+}
+
+.song-row.playing {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.col-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.col-title img {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.song-name {
+    font-weight: 500;
+}
+
+.song-artist {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.song-row.playing .song-artist {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* 加载中和错误提示样式 */
+.loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: var(--text-secondary);
+}
+
+.error-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: var(--error);
+}
+
+/* 身份验证模态框样式 */
+.auth-modal {
+    z-index: 1000;
+    display: flex;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal .modal-content {
+    width: 400px;
+    max-width: 90%;
+    background-color: var(--bg-tertiary);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+}
+
+.auth-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+.auth-tab {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.auth-tab.active {
+    color: var(--accent-primary);
+    font-weight: 500;
+}
+
+.auth-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--accent-primary);
+}
+
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+    animation: slideUp 0.3s ease;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+}
+
+.form-group small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.verification-code .code-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.verification-code input {
+    flex: 1;
+}
+
+#sendCodeBtn {
+    width: 80px;
+    white-space: nowrap;
+    background-color: var(--accent-secondary);
+    transition: all 0.3s;
+}
+
+#sendCodeBtn:hover {
+    background-color: var(--accent-primary);
+}
+
+#sendCodeBtn.disabled {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.form-actions {
+    margin-top: 30px;
+}
+
+.btn-primary,
+.btn-secondary {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background-color: var(--accent-secondary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.auth-links {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.auth-links a {
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.modal,
+.modal-backdrop {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal.show,
+.modal-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 输入验证样式 */
+.form-group.error input {
+    border-color: var(--error);
+}
+
+.form-group .error-message {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-group.error .error-message {
+    display: block;
+}
+
+@media (Height<=660px) {
+    .form-group {
+        margin-bottom: 5px;
+    }
+}

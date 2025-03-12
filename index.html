@@ -228,7 +228,7 @@
                         <div class="song-list">
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">Bohemian Rhapsody</div>
                                         <div class="song-artist">Queen</div>
@@ -238,7 +238,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">七里香</div>
                                         <div class="song-artist">周杰伦</div>
@@ -248,7 +248,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">七里香</div>
                                         <div class="song-artist">周杰伦</div>
@@ -258,7 +258,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">七里香</div>
                                         <div class="song-artist">周杰伦</div>
@@ -268,7 +268,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">七里香</div>
                                         <div class="song-artist">周杰伦</div>
@@ -278,7 +278,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">七里香</div>
                                         <div class="song-artist">周杰伦</div>
@@ -288,7 +288,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">七里香</div>
                                         <div class="song-artist">周杰伦</div>
@@ -298,7 +298,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">七里香</div>
                                         <div class="song-artist">周杰伦</div>
@@ -308,7 +308,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">Shape of You</div>
                                         <div class="song-artist">Ed Sheeran</div>
@@ -318,7 +318,7 @@
                             </div>
                             <div class="song-item">
                                 <div class="song-info">
-                                    <img src="https://via.placeholder.com/40" alt="Cover">
+                                    <img src="#" alt="Cover">
                                     <div>
                                         <div class="song-title">Blinding Lights</div>
                                         <div class="song-artist">The Weeknd</div>
@@ -368,7 +368,7 @@
                         </svg>
                     </div>
                     
-                    <div class="tool-item user">
+                    <div class="tool-item user" id="user-menu-toggle">
                         <img src="./img/crayon.jpg" alt="用户头像">
                         <span class="user-status"></span>
                     </div>
@@ -440,8 +440,52 @@
                         </svg>
                     </div>
                 </div>
+                
+                <!-- 用户信息,实现退出登录功能的按钮 -->
+                <div class="user-menu" id="user-menu">
+                    <div class="user-info">
+                        <div class="avator">
+                            <img src="./img/crayon.jpg" alt="用户头像">
+                        </div>
+                        <div class="user-name" id="user-name">用户</div>
+                        <div class="user-email" id="user-email">1104507145@qq.com</div>
+                        <div class="logout" id="logout">
+                            <span>退出登录</span>
+                        </div>
+                    </div>
+                </div>
+                        
             </div>
-          
+            <div class="mainContentArea">
+                <div class="classify">
+                    <div class="singerClassification">
+                        <ul class="singerClassificationListByType">
+                            <li data-type="-1" class="all">全部</li>
+                            <li data-type="1" class="man">男歌手</li>
+                            <li data-type="2" class="woman">女歌手</li>
+                            <li data-type="3" class="band">乐队组合</li>
+                        </ul>
+                        <div class="devide"></div>
+                        <ul class="singerClassificationListByArea">
+                            <li data-area="-1" class="all">全部</li>
+                            <li data-area="7" class="cn">华语</li>
+                            <li data-area="96" class="eu">欧美</li>
+                            <li data-area="8" class="jp">日本</li>
+                            <li data-area="16" class="kr">韩国</li>
+                            <li data-area="0" class="other">其他</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="classified-singer">
+                    <div class="singer-items">
+                        <img src="./img/crayon.jpg" alt="歌手图片">
+                        <div class="singer-info">
+                            <div class="singer-name" data-id="$">歌手名称</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <div class="player">
@@ -565,10 +609,100 @@
                     <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" fill="currentColor"/>
                 </svg>
             </button>
+
+        </div>
+        <div class="playlist">
+            <div class="play-list-content">
+                <div class="song-items">
+                    <img src="./img/crayon.jpg" alt="歌曲图片">
+                    <div class="song-info">
+                        <span>歌曲名称</span>
+                        <span>歌手名称</span>
+                    </div>
+                    <div class="duration">
+                        <span>05:20</span>
+                    </div>
+                    <div class="delete">
+                        <svg t="1741662976047" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="23920" width="16" height="16"><path d="M572.91974805 512l242.82096754-242.82096757c16.30246778-16.30246778 16.30246778-43.75925563 0-60.91974802-16.30246778-16.30246778-43.75925563-16.30246778-60.91974802 0L512 451.08025195 269.17903243 208.25928441c-16.30246778-16.30246778-43.75925563-16.30246778-60.91974802 0-16.30246778 16.30246778-16.30246778 43.75925563 0 60.91974802L451.08025195 512l-242.82096754 242.82096757c-16.30246778 16.30246778-16.30246778 43.75925563 0 60.91974802 16.30246778 16.30246778 43.75925563 16.30246778 60.91974802 0l242.82096757-242.82096754 242.82096757 242.82096754c16.30246778 16.30246778 43.75925563 16.30246778 60.91974802 0 16.30246778-16.30246778 16.30246778-43.75925563 0-60.91974802L572.91974805 512z" fill="#3A414B" p-id="23921"></path></svg>
+                    </div>
+                </div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+                <div class="song-items"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 用户登录/注册模态框 -->
+<div class="modal auth-modal" id="authModal">
+    <div class="modal-content">
+        <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login">登录</button>
+            <button class="auth-tab" data-tab="register">注册</button>
+        </div>
+        
+        <!-- 登录表单 -->
+        <div class="auth-form login-form active">
+            <div class="form-group">
+                <label for="loginEmail">邮箱</label>
+                <input type="email" id="loginEmail" placeholder="请输入邮箱" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">密码</label>
+                <input type="password" id="loginPassword" placeholder="请输入密码" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="loginBtn" class="btn-primary">登录</button>
+            </div>
+            <div class="auth-links">
+                <a href="#" id="forgotPassword">忘记密码?</a>
+            </div>
+        </div>
+        
+        <!-- 注册表单 -->
+        <div class="auth-form register-form">
+            <div class="form-group">
+                <label for="registerName">用户名</label>
+                <input type="text" id="registerName" placeholder="请输入用户名" required>
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">邮箱</label>
+                <input type="email" id="registerEmail" placeholder="请输入邮箱" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">密码</label>
+                <input type="password" id="registerPassword" placeholder="请输入密码" required>
+                <small>密码长度至少6位，包含字母和数字</small>
+            </div>
+            <div class="form-group verification-code">
+                <label for="verificationCode">验证码</label>
+                <div class="code-input-group">
+                    <input type="text" id="verificationCode" placeholder="请输入验证码" required>
+                    <button type="button" id="sendCodeBtn" class="btn-secondary">发送验证码</button>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="registerBtn" class="btn-primary">注册</button>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- 模态框背景遮罩 -->
+<div class="modal-backdrop" id="authBackdrop"></div>
+    <script src="./js/axios.js"></script>
     <script src="./js/main.js"></script>
 </body>
 
