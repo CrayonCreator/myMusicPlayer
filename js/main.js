@@ -684,11 +684,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         shuffleBtn.addEventListener('click', toggleShuffle);
         shuffleBtn.addEventListener('click', () => {
-           shuffleBtn.classList.toggle('active'); 
+            shuffleBtn.classList.toggle('active');
         });
 
         repeatBtn.addEventListener('click', toggleRepeat);
-  
+
 
         favoriteBtn.addEventListener('click', toggleFavorite);
 
@@ -736,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     playListBtn.addEventListener('click', (e) => {
         console.log("歌单按钮被点击了");
-        e.stopPropagation(); 
+        e.stopPropagation();
         playList.classList.toggle('show');
     });
 
@@ -1069,15 +1069,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const addToPlaylistBtn = row.querySelector('.btn-add-to-playlist');
             addToPlaylistBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-    
+
                 if (row.classList.contains('unplayable')) {
                     showNotification('无法添加不可播放的歌曲');
                     return;
                 }
-    
+
                 const songIndex = parseInt(row.getAttribute('data-index'));
                 const song = songs[songIndex];
-    
+
                 const trackToAdd = {
                     id: song.id,
                     title: song.name,
@@ -1087,10 +1087,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     duration: song.dt / 1000,
                     playable: true
                 };
-    
+
                 // 检查歌曲是否已在列表中
                 const existingIndex = playerState.playlist.findIndex(track => track.id === trackToAdd.id);
-    
+
                 if (existingIndex !== -1) {
                     showNotification('该歌曲已在播放列表中');
                 } else {
@@ -1101,7 +1101,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-     
+
 
         await checkMusicCanPlay(songs, checkingMusicAbortController.signal);
 
@@ -1198,10 +1198,27 @@ document.addEventListener('DOMContentLoaded', function () {
             <!-- 加载中指示器 -->
             <div class="loading-indicator">加载中...</div>
         </div>
+        <div class="playlistClassification">
+            <ul>
+                <li data-cat="全部" class="all">全部</li>
+                <li data-cat="华语">华语</li>
+                <li data-cat="古风">古风</li>
+                <li data-cat="流行">流行</li>
+                <li data-cat="摇滚">摇滚</li>
+                <li data-cat="民谣">民谣</li>
+                <li data-cat="电子">电子</li>
+            </ul>
+        </div>
+        <div class="classified-playlist">
+            <div class="loading-indicator">加载中...</div>
+        </div>
     `;
+
         // 获取新的元素
         const classifiedSinger = document.querySelector('.classified-singer');
+        const classifiedPlaylist = document.querySelector('.classified-playlist');
 
+        // 加载歌手数据
         if (cachedSingers) {
             renderSingers(cachedSingers, classifiedSinger);
         } else {
@@ -1214,8 +1231,114 @@ document.addEventListener('DOMContentLoaded', function () {
                 classifiedSinger.innerHTML = '<div class="error-message">获取歌手数据失败，请稍后再试</div>';
             });
         }
-    }
 
+        // 加载歌单数据
+        getPlaylistAll().then(res => {
+            let innerHTML = res.map((item) => {
+                return `
+            <div class="playlist-items">
+                <img src="${item.coverImgUrl}" alt="${item.name}">
+                <div class="playlist-info">
+                    <div class="playlist-name" data-id="${item.id}">${item.name}</div>
+                    <div class="playlist-author">${item.creator.nickname}</div>
+                    <div class="playlist-description">${item.description || ''}</div>
+                </div>
+            </div>`;
+            }).join('');
+            classifiedPlaylist.innerHTML = innerHTML;
+        }).catch(error => {
+            console.error('获取歌单数据失败:', error);
+            classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
+        });
+
+        // 重新绑定事件监听器
+        const singerClassificationListByType = document.querySelector('.singerClassificationListByType');
+        const singerClassificationListByArea = document.querySelector('.singerClassificationListByArea');
+        const playlistClassification = document.querySelector('.playlistClassification');
+
+        // 为类型筛选添加事件
+        if (singerClassificationListByType) {
+            singerClassificationListByType.addEventListener('click', (e) => {
+                if (e.target.tagName === 'LI') {
+                    const singerType = e.target.getAttribute('data-type');
+                    getSingerByType(singerType).then(res => {
+                        renderSingers(res, classifiedSinger);
+                    }).catch(error => {
+                        console.error('获取歌手数据失败:', error);
+                        classifiedSinger.innerHTML = '<div class="error-message">获取歌手数据失败，请稍后再试</div>';
+                    });
+                }
+            });
+        }
+
+        // 为地区筛选添加事件
+        if (singerClassificationListByArea) {
+            singerClassificationListByArea.addEventListener('click', (e) => {
+                if (e.target.tagName === 'LI') {
+                    const singerArea = e.target.getAttribute('data-area');
+                    getSingerByArea(singerArea).then(res => {
+                        renderSingers(res, classifiedSinger);
+                    }).catch(error => {
+                        console.error('获取歌手数据失败:', error);
+                        classifiedSinger.innerHTML = '<div class="error-message">获取歌手数据失败，请稍后再试</div>';
+                    });
+                }
+            });
+        }
+
+        // 为歌单分类添加事件
+        if (playlistClassification) {
+            playlistClassification.addEventListener('click', (e) => {
+                if (e.target.tagName === 'LI') {
+                    const playlistCat = e.target.getAttribute('data-cat');
+                    getPlaylistByCat(playlistCat).then(res => {
+                        let innerHTML = res.map((item) => {
+                            return `
+                        <div class="playlist-items">
+                            <img src="${item.coverImgUrl}" alt="${item.name}">
+                            <div class="playlist-info">
+                                <div class="playlist-name" data-id="${item.id}">${item.name}</div>
+                                <div class="playlist-author">${item.creator.nickname}</div>
+                                <div class="playlist-description">${item.description || ''}</div>
+                            </div>
+                        </div>`;
+                        }).join('');
+                        classifiedPlaylist.innerHTML = innerHTML;
+                    }).catch(error => {
+                        console.error('获取歌单数据失败:', error);
+                        classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
+                    });
+                }
+            });
+        }
+
+        // 为歌单点击添加事件
+        classifiedPlaylist.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('playlist-name') || e.target.closest('.playlist-items')) {
+                const playlistId = e.target.classList.contains('playlist-name') ?
+                    e.target.getAttribute('data-id') :
+                    e.target.closest('.playlist-items').querySelector('.playlist-name').getAttribute('data-id');
+
+                const playlistNameElement = e.target.closest('.playlist-items').querySelector('.playlist-name');
+                const playlistName = playlistNameElement.textContent;
+                showNotification(`正在加载 ${playlistName} 的歌曲...`);
+
+                try {
+                    const songs = await getPlaylistSongs(playlistId);
+                    console.log("歌单歌曲:", songs);
+
+                    if (songs && songs.length > 0) {
+                        showPlaylistDetail(playlistId, playlistName, songs);
+                    } else {
+                        showNotification("未找到该歌单的歌曲");
+                    }
+                } catch (error) {
+                    console.error("获取歌单歌曲失败:", error);
+                    showNotification("获取歌单歌曲失败，请稍后再试");
+                }
+            }
+        });
+    }
 
     //渲染歌手
     function renderSingers(singers, container) {
@@ -1247,7 +1370,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             showNotification(`正在加载 ${singerName} 的热门歌曲...`);
 
-           
+
         });
     }
 
@@ -1626,4 +1749,264 @@ document.addEventListener('DOMContentLoaded', function () {
     function validatePassword(password) {
         return password.length >= 6 && /[a-zA-Z]/.test(password) && /\d/.test(password);
     }
+
+    // 精品分类歌单展示
+
+    const playlistClassification = document.querySelector('.playlistClassification');
+    const classifiedPlaylist = document.querySelector('.classified-playlist');
+    // 请求歌单图片，名称，id
+    function getPlaylistByCat(cat) {
+        return vercel.get(`/top/playlist/highquality?cat=${cat}&limit=20`)
+            .then(response => response.data.playlists);
+    }
+
+    function getPlaylistAll() {
+        return vercel.get(`/top/playlist/highquality?limit=20`)
+            .then(response => response.data.playlists);
+    }
+    // 默认获取全部歌单
+    (() => {
+        getPlaylistAll().then(res => {
+            let innerHTML = res.map((item) => {
+                return `
+                <div class="playlist-items">
+                    <img src="${item.coverImgUrl}" alt="${item.name}">
+                    <div class="playlist-info">
+                        <div class="playlist-name" data-id="${item.id}">${item.name}</div>
+                        <div class="playlist-author">${item.creator.nickname}</div>
+                        <div class="playlist-description">${item.description}</div>
+                    </div>
+                </div>`
+            }).join('');
+            classifiedPlaylist.innerHTML = innerHTML;
+        }).catch(error => {
+            console.error('获取歌单数据失败:', error);
+            classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
+        });
+    })()
+
+
+    playlistClassification.addEventListener('click', (e) => {
+        if (e.target.tagName === 'LI') {
+            const playlistCat = e.target.getAttribute('data-cat');
+            getPlaylistByCat(playlistCat).then(res => {
+                let innerHTML = res.map((item) => {
+                    return `
+                    <div class="playlist-items">
+                        <img src="${item.coverImgUrl}" alt="${item.name}">
+                        <div class="playlist-info">
+                            <div class="playlist-name" data-id="${item.id}">${item.name}</div>
+                            <div class="playlist-author">${item.creator.nickname}</div>
+                            <div class="playlist-description">${item.description}</div>
+                        </div>
+                    </div>`
+                }).join('');
+                classifiedPlaylist.innerHTML = innerHTML;
+            }).catch(error => {
+                console.error('获取歌单数据失败:', error);
+                classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
+            });
+        }
+    });
+
+
+
+
+    //点击歌单进入歌单详情页
+
+    const playlistItems = document.querySelector('.classified-playlist');
+
+    playlistItems.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('playlist-name') || e.target.closest('.playlist-items')) {
+            const playlistId = e.target.classList.contains('playlist-name') ?
+                e.target.getAttribute('data-id') :
+                e.target.closest('.playlist-items').querySelector('.playlist-name').getAttribute('data-id');
+
+            const playlistNameElement = e.target.closest('.playlist-items').querySelector('.playlist-name');
+            const playlistName = playlistNameElement.textContent;
+            showNotification(`正在加载 ${playlistName} 的歌曲...`);
+
+            try {
+                const songs = await getPlaylistSongs(playlistId);
+                console.log("歌单歌曲:", songs);
+
+                if (songs && songs.length > 0) {
+                    showPlaylistDetail(playlistId, playlistName, songs);
+                } else {
+                    showNotification("未找到该歌单的歌曲");
+                }
+            } catch (error) {
+                console.error("获取歌单歌曲失败:", error);
+                showNotification("获取歌单歌曲失败，请稍后再试");
+            }
+        }
+    });
+
+
+
+    //获取歌单所有歌曲
+
+    function getPlaylistSongs(playlistId, playlistName,songs) {
+        return vercel.get(`/playlist/track/all?id=${playlistId}`)
+            .then(response => response.data.songs);
+    }
+
+    //显示歌单详情页
+    function showPlaylistDetail(playlistId, playlistName, songs) {
+        const playlistModal = document.getElementById('playlistModal');
+        const modalBackdrop = document.getElementById('modalBackdrop');
+
+        if (!playlistModal) {
+            console.log('未找到歌单详情页');
+            showNotification('寻找歌单详情页失败');
+            return;
+        }
+
+        playlistModal.querySelector('.modal-content').innerHTML = `
+        <div class="modal-header">
+            <h3>${playlistName || '歌单详情'}</h3>
+            <button class="close-modal">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="loading-indicator">加载中...</div>
+        </div>
+    `;
+
+        playlistModal.classList.add('show');
+        modalBackdrop.classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        playlistModal.querySelector('.close-modal').addEventListener('click', () => {
+            playlistModal.classList.remove('show');
+            modalBackdrop.classList.remove('show');
+            document.body.style.overflow = '';
+        });
+
+        getPlaylistSongs(playlistId).then((res) => {
+
+            const modalBody = playlistModal.querySelector('.modal-body');
+            let innerHTML = `
+            <div class="playlist-info">
+                <button class="play-all-btn">
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M8 5v14l11-7z" fill="currentColor"/>
+                    </svg>
+                    播放全部
+                </button>
+            </div>
+            <div class="song-list">
+            `;
+            innerHTML+= songs.map((item, index) => {
+                return `
+                    <div class="song-item" data-index="${index}" data-musicId="${item.id}">
+                        <div class="song-info">
+                            <img src="${item.al.picUrl || './img/crayon.jpg'}" alt="${item.name}">
+                            <div>
+                                <div class="song-title">${item.name}</div>
+                                <div class="song-artist">${item.ar.map(a => a.name).join(', ') || '未知歌手'}</div>
+                            </div>
+                        </div>
+                        <div class="song-actions">
+                            <button class="btn-add-to-playlist" title="加入播放列表">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            innerHTML += `</div>`;
+
+            modalBody.innerHTML = innerHTML;
+            modalBody.querySelector('.play-all-btn').addEventListener('click', () => {
+                const newPlaylist = songs.map(song => {
+                    return {
+                        id: song.id,
+                        title: song.name,
+                        artist: song.ar.map(a => a.name).join(', '),
+                        cover: song.al.picUrl || './img/crayon.jpg',
+                        audio: null,
+                        duration: song.dt / 1000,
+                        playable: true
+                    };
+                });
+                
+                // 更新播放列表
+                playerState.playlist = newPlaylist;
+                playerState.currentTrackIndex = 0;
+                
+                // 播放第一首
+                loadAndPlayTrack(0);
+                showNotification(`已添加 ${songs.length} 首歌曲到播放列表`);
+                
+                // 关闭模态框
+                playlistModal.classList.remove('show');
+                modalBackdrop.classList.remove('show');
+                document.body.style.overflow = '';
+            });
+
+            modalBody.querySelectorAll('.song-item').forEach((songItem, index) => {
+                songItem.addEventListener('click', () => {
+                    const songIndex = parseInt(songItem.getAttribute('data-index'));
+                    const song = songs[songIndex];
+                    
+                    const singleSongPlaylist = [{
+                        id: song.id,
+                        title: song.name,
+                        artist: song.ar.map(a => a.name).join(', '),
+                        cover: song.al.picUrl || './img/crayon.jpg',
+                        audio: null,
+                        duration: song.dt / 1000,
+                        playable: true
+                    }];
+                    
+                    // 替换播放列表并播放
+                    playerState.playlist = singleSongPlaylist;
+                    playerState.currentTrackIndex = 0;
+                    loadAndPlayTrack(0);
+                });
+                
+                const addToPlaylistBtn = songItem.querySelector('.btn-add-to-playlist');
+                addToPlaylistBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    const songIndex = parseInt(songItem.getAttribute('data-index'));
+                    const song = songs[songIndex];
+                    
+                    const trackToAdd = {
+                        id: song.id,
+                        title: song.name,
+                        artist: song.ar.map(a => a.name).join(', '),
+                        cover: song.al.picUrl || './img/crayon.jpg',
+                        audio: null,
+                        duration: song.dt / 1000,
+                        playable: true
+                    };
+                    
+                    // 检查歌曲是否已在列表中
+                    const existingIndex = playerState.playlist.findIndex(track => track.id === trackToAdd.id);
+                    
+                    if (existingIndex !== -1) {
+                        showNotification('该歌曲已在播放列表中');
+                    } else {
+                        playerState.playlist.push(trackToAdd);
+                        updataPlaylistUI();
+                        showNotification(`已添加《${song.name}》到播放列表`);
+                    }
+                });
+            });
+
+        }).catch(error => {
+            console.error('获取歌单歌曲失败:', error);
+            modalBody.innerHTML = '<div class="error-message">获取歌单歌曲失败，请稍后再试</div>';
+        });
+    }
+
+
 });
