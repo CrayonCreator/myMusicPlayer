@@ -1846,7 +1846,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //获取歌单所有歌曲
 
-    function getPlaylistSongs(playlistId, playlistName,songs) {
+    function getPlaylistSongs(playlistId) {
         return vercel.get(`/playlist/track/all?id=${playlistId}`)
             .then(response => response.data.songs);
     }
@@ -1857,9 +1857,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const modalBackdrop = document.getElementById('modalBackdrop');
 
         if (!playlistModal) {
-            console.log('未找到歌单详情页');
-            showNotification('寻找歌单详情页失败');
-            return;
+            const newModal = document.createElement('div');
+            newModal.id = 'playlistModal';
+            newModal.className = 'modal';
+            newModal.innerHTML = '<div class="modal-content"></div>';
+            document.body.appendChild(newModal);
+
+            const newBackdrop = document.createElement('div');
+            newBackdrop.id = 'modalBackdrop';
+            newBackdrop.className = 'modal-backdrop';
+            document.body.appendChild(newBackdrop);
+
+            return showPlaylistDetail(playlistId, playlistName, songs);
         }
 
         playlistModal.querySelector('.modal-content').innerHTML = `
@@ -1886,64 +1895,91 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.style.overflow = '';
         });
 
-        getPlaylistSongs(playlistId).then((res) => {
-
-            const modalBody = playlistModal.querySelector('.modal-body');
-            let innerHTML = `
-            <div class="playlist-info">
-                <button class="play-all-btn">
-                    <svg viewBox="0 0 24 24" width="16" height="16">
-                        <path d="M8 5v14l11-7z" fill="currentColor"/>
-                    </svg>
-                    播放全部
-                </button>
-            </div>
-            <div class="song-list">
-            `;
-            innerHTML+= songs.map((item, index) => {
-                return `
-                    <div class="song-item" data-index="${index}" data-musicId="${item.id}">
-                        <div class="song-info">
-                            <img src="${item.al.picUrl || './img/crayon.jpg'}" alt="${item.name}">
-                            <div>
-                                <div class="song-title">${item.name}</div>
-                                <div class="song-artist">${item.ar.map(a => a.name).join(', ') || '未知歌手'}</div>
-                            </div>
-                        </div>
-                        <div class="song-actions">
-                            <button class="btn-add-to-playlist" title="加入播放列表">
-                                <svg viewBox="0 0 24 24" width="16" height="16">
-                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
-                                </svg>
-                            </button>
+        const modalBody = playlistModal.querySelector('.modal-body');
+        let innerHTML = `
+        <div class="playlist-info">
+            <button class="play-all-btn">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path d="M8 5v14l11-7z" fill="currentColor"/>
+                </svg>
+                播放全部
+            </button>
+        </div>
+        <div class="song-list">
+        `;
+        innerHTML += songs.map((item, index) => {
+            return `
+                <div class="song-item" data-index="${index}" data-musicId="${item.id}">
+                    <div class="song-info">
+                        <img src="${item.al.picUrl || './img/crayon.jpg'}" alt="${item.name}">
+                        <div>
+                            <div class="song-title">${item.name}</div>
+                            <div class="song-artist">${item.ar.map(a => a.name).join(', ') || '未知歌手'}</div>
                         </div>
                     </div>
-                `;
-            }).join('');
+                    <div class="song-actions">
+                        <button class="btn-add-to-playlist" title="加入播放列表">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
 
-            innerHTML += `</div>`;
+        innerHTML += `</div>`;
 
-            modalBody.innerHTML = innerHTML;
-            modalBody.querySelector('.play-all-btn').addEventListener('click', () => {
-                const newPlaylist = songs.map(song => {
-                    return {
-                        id: song.id,
-                        title: song.name,
-                        artist: song.ar.map(a => a.name).join(', '),
-                        cover: song.al.picUrl || './img/crayon.jpg',
-                        audio: null,
-                        duration: song.dt / 1000,
-                        playable: true
-                    };
-                });
-                
-                // 更新播放列表
-                playerState.playlist = newPlaylist;
+        modalBody.innerHTML = innerHTML;
+        
+        // 添加播放全部按钮事件处理程序
+        modalBody.querySelector('.play-all-btn').addEventListener('click', () => {
+            const newPlaylist = songs.map(song => {
+                return {
+                    id: song.id,
+                    title: song.name,
+                    artist: song.ar.map(a => a.name).join(', '),
+                    cover: song.al.picUrl || './img/crayon.jpg',
+                    audio: null,
+                    duration: song.dt / 1000,
+                    playable: true
+                };
+            });
+
+            // 更新播放列表
+            playerState.playlist = newPlaylist;
+            playerState.currentTrackIndex = 0;
+
+            // 播放第一首
+            loadAndPlayTrack(0);
+            showNotification(`已添加 ${songs.length} 首歌曲到播放列表`);
+
+            // 关闭模态框
+            playlistModal.classList.remove('show');
+            modalBackdrop.classList.remove('show');
+            document.body.style.overflow = '';
+        });  // 这里正确闭合播放全部按钮事件处理程序
+
+        // 为每个歌曲项添加事件处理程序
+        modalBody.querySelectorAll('.song-item').forEach((songItem, index) => {
+            songItem.addEventListener('click', () => {
+                const songIndex = parseInt(songItem.getAttribute('data-index'));
+                const song = songs[songIndex];
+
+                const singleSongPlaylist = [{
+                    id: song.id,
+                    title: song.name,
+                    artist: song.ar.map(a => a.name).join(', '),
+                    cover: song.al.picUrl || './img/crayon.jpg',
+                    audio: null,
+                    duration: song.dt / 1000,
+                    playable: true
+                }];
+
+                // 替换播放列表并播放
+                playerState.playlist = singleSongPlaylist;
                 playerState.currentTrackIndex = 0;
-                
-                // 播放第一首
                 loadAndPlayTrack(0);
-                showNotification(`已添加 ${songs.length} 首歌曲到播放列表`);
                 
                 // 关闭模态框
                 playlistModal.classList.remove('show');
@@ -1951,62 +1987,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.body.style.overflow = '';
             });
 
-            modalBody.querySelectorAll('.song-item').forEach((songItem, index) => {
-                songItem.addEventListener('click', () => {
-                    const songIndex = parseInt(songItem.getAttribute('data-index'));
-                    const song = songs[songIndex];
-                    
-                    const singleSongPlaylist = [{
-                        id: song.id,
-                        title: song.name,
-                        artist: song.ar.map(a => a.name).join(', '),
-                        cover: song.al.picUrl || './img/crayon.jpg',
-                        audio: null,
-                        duration: song.dt / 1000,
-                        playable: true
-                    }];
-                    
-                    // 替换播放列表并播放
-                    playerState.playlist = singleSongPlaylist;
-                    playerState.currentTrackIndex = 0;
-                    loadAndPlayTrack(0);
-                });
-                
-                const addToPlaylistBtn = songItem.querySelector('.btn-add-to-playlist');
-                addToPlaylistBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    
-                    const songIndex = parseInt(songItem.getAttribute('data-index'));
-                    const song = songs[songIndex];
-                    
-                    const trackToAdd = {
-                        id: song.id,
-                        title: song.name,
-                        artist: song.ar.map(a => a.name).join(', '),
-                        cover: song.al.picUrl || './img/crayon.jpg',
-                        audio: null,
-                        duration: song.dt / 1000,
-                        playable: true
-                    };
-                    
-                    // 检查歌曲是否已在列表中
-                    const existingIndex = playerState.playlist.findIndex(track => track.id === trackToAdd.id);
-                    
-                    if (existingIndex !== -1) {
-                        showNotification('该歌曲已在播放列表中');
-                    } else {
-                        playerState.playlist.push(trackToAdd);
-                        updataPlaylistUI();
-                        showNotification(`已添加《${song.name}》到播放列表`);
-                    }
-                });
-            });
+            const addToPlaylistBtn = songItem.querySelector('.btn-add-to-playlist');
+            addToPlaylistBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
 
-        }).catch(error => {
-            console.error('获取歌单歌曲失败:', error);
-            modalBody.innerHTML = '<div class="error-message">获取歌单歌曲失败，请稍后再试</div>';
+                const songIndex = parseInt(songItem.getAttribute('data-index'));
+                const song = songs[songIndex];
+
+                const trackToAdd = {
+                    id: song.id,
+                    title: song.name,
+                    artist: song.ar.map(a => a.name).join(', '),
+                    cover: song.al.picUrl || './img/crayon.jpg',
+                    audio: null,
+                    duration: song.dt / 1000,
+                    playable: true
+                };
+
+                // 检查歌曲是否已在列表中
+                const existingIndex = playerState.playlist.findIndex(track => track.id === trackToAdd.id);
+
+                if (existingIndex !== -1) {
+                    showNotification('该歌曲已在播放列表中');
+                } else {
+                    playerState.playlist.push(trackToAdd);
+                    updataPlaylistUI();
+                    showNotification(`已添加《${song.name}》到播放列表`);
+                }
+            });
         });
     }
+    
 
 
 });
