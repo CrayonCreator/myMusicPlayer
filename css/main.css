@@ -865,7 +865,7 @@ body {
     position: relative;
     width: 60px;
     height: 60px;
-    border-radius: 6px;
+    border-radius: 50%;
     overflow: hidden;
     margin-right: 15px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -1418,6 +1418,8 @@ body {
     align-items: center;
     position: relative;
     cursor: pointer;
+    transition: all 0.5s ease;
+    border-radius: 8px;
 }
 
 .singer-items img {
@@ -1428,9 +1430,14 @@ body {
     display: flex;
 }
 
+.singer-items:hover {
+    background-color: var(--bg-tertiary);
+}
+
 /* 歌手详情页样式 */
 .artist-detail {
     padding: 20px;
+    width: calc(100vw - 250px);
 }
 
 .back-button {
@@ -1489,7 +1496,7 @@ body {
 
 .table-header {
     display: grid;
-    grid-template-columns: 50px 1fr 1fr 100px;
+    grid-template-columns: 50px 1fr 1fr 100px 60px;
     padding: 12px 20px;
     background-color: var(--bg-tertiary);
     border-bottom: 1px solid var(--border-color);
@@ -1499,13 +1506,15 @@ body {
 
 .song-row {
     display: grid;
-    grid-template-columns: 50px 1fr 1fr 100px;
+    grid-template-columns: 50px 1fr 1fr 100px 60px;
     padding: 10px 20px;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
     transition: all 0.2s ease;
     cursor: pointer;
 }
+
+
 
 .song-row:hover {
     background-color: var(--bg-secondary);
@@ -1529,8 +1538,46 @@ body {
     object-fit: cover;
 }
 
+.col-actions{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-add-to-playlist {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    opacity: 0.7; 
+}
+
+.song-row:hover .btn-add-to-playlist {
+    opacity: 1;
+}
+
+.song-row.unplayable .btn-add-to-playlist {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-add-to-playlist:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+    color: var(--accent-primary);
+    transform: scale(1.1);
+}
+
+
 .song-name {
     font-weight: 500;
+    display: flex;
+    align-items: center;
 }
 
 .song-artist {
@@ -1794,6 +1841,21 @@ body {
 
 .form-group.error .error-message {
     display: block;
+}
+
+.btn-repeat.mode-one{
+    background-color: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+.btn-repeat.mode-all{
+    background-color: var(--accent-primary);
+    color: var(--warning);
+}
+
+.btn-shuffle.active{
+    background-color: var(--accent-primary);
+    color: var(--bg-primary);
 }
 
 @media (Height<=660px) {

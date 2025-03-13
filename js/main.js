@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
     themeToggle.innerHTML = `
         <svg viewBox="0 0 24 24" width="20" height="20" class="moon-icon">
             <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z" fill="currentColor"></path>
-            <path d="M12 5c-3.86 0-7 3.14-7 7s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="currentColor"></path>
+            <path d="M12 5c-3.86 0-7 3.14-7 7s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="currentColor"></path>
         </svg>
         <svg viewBox="0 0 24 24" width="20" height="20" class="sun-icon" style="display:none">
             <path d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zm-2 5.79V18h-3.52L12 20.48 9.52 18H6v-3.52L3.52 12 6 9.52V6h3.52L12 3.52 14.48 6H18v3.52L20.48 12 18 14.48z" fill="currentColor"></path>
@@ -404,8 +404,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentTimeEl = document.querySelector('.current-time');
     const totalTimeEl = document.querySelector('.total-time');
     const musicCover = document.querySelector('.music-cover');
-    const songTitle = document.querySelector('.song-title');
-    const songArtist = document.querySelector('.song-artist');
+    const songTitle = document.querySelector('#song-title');
+    const songArtist = document.querySelector('#song-artist');
 
     // 播放器状态
     const playerState = {
@@ -417,14 +417,6 @@ document.addEventListener('DOMContentLoaded', function () {
         volume: 0.7,
         currentTrackIndex: 0,
         playlist: [
-            {
-                title: '七里香',
-                artist: '周杰伦',
-                cover: './img/crayon.jpg',
-                audio: 'https://example.com/audio/qilixiang.mp3',
-                id: 1,
-                duration: 273 // 秒
-            },
 
         ]
     };
@@ -435,40 +427,20 @@ document.addEventListener('DOMContentLoaded', function () {
         audioPlayer.volume = playerState.volume;
         updateVolumeUI();
 
-        // 加载第一首歌
-        loadTrack(playerState.currentTrackIndex);
+        if (playerState.playlist.length > 0) {
+            loadAndPlayTrack(playerState.currentTrackIndex);
+        } else {
+            songTitle.textContent = '暂无歌曲';
+            songArtist.textContent = '请添加歌曲到播放列表';
+            musicCover.src = './img/crayon.jpg';
+            totalTimeEl.textContent = '0:00';
+            currentTimeEl.textContent = '0:00';
+        }
 
         // 添加事件监听器
         attachEventListeners();
     }
 
-    // 加载歌曲
-    function loadTrack(index) {
-        const track = playerState.playlist[index];
-
-        // 更新UI
-        songTitle.textContent = track.title;
-        songArtist.textContent = track.artist;
-        musicCover.src = track.cover;
-
-        // 如果有实际的音频文件，则设置
-        if (track.audio) {
-            audioPlayer.src = track.audio;
-        }
-
-        // 更新总时长
-        totalTimeEl.textContent = formatTime(track.duration);
-
-        // 重置进度条
-        progress.style.width = '0%';
-        progressHandle.style.left = '0%';
-        currentTimeEl.textContent = '0:00';
-
-        // 如果正在播放，则自动播放下一首
-        if (playerState.isPlaying) {
-            playAudio();
-        }
-    }
 
     // 播放音频
     function playAudio() {
@@ -479,7 +451,6 @@ document.addEventListener('DOMContentLoaded', function () {
             musicCover.classList.add('playing');
         }).catch(error => {
             console.error('播放失败:', error);
-
         });
     }
 
@@ -498,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 根据重复模式决定下一步操作
         if (playerState.repeatMode === 'one') {
             // 重复当前歌曲
-            loadTrack(playerState.currentTrackIndex);
+            loadAndPlayTrack(playerState.currentTrackIndex);
             playAudio();
         } else if (playerState.repeatMode === 'all') {
             // 播放下一首，如果是最后一首则回到第一首
@@ -525,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 顺序播放
             playerState.currentTrackIndex = (playerState.currentTrackIndex + 1) % playerState.playlist.length;
         }
-        loadTrack(playerState.currentTrackIndex);
+        loadAndPlayTrack(playerState.currentTrackIndex);
         playAudio();
     }
 
@@ -539,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 顺序播放，如果是第一首则跳到最后一首(类似轮播图？)
             playerState.currentTrackIndex = (playerState.currentTrackIndex - 1 + playerState.playlist.length) % playerState.playlist.length;
         }
-        loadTrack(playerState.currentTrackIndex);
+        loadAndPlayTrack(playerState.currentTrackIndex);
         playAudio();
     }
 
@@ -557,12 +528,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 切换随机播放
     function toggleShuffle() {
+        console.log('切换随机播放');
         playerState.isShuffled = !playerState.isShuffled;
         shuffleBtn.classList.toggle('active', playerState.isShuffled);
     }
 
     // 切换重复模式
     function toggleRepeat() {
+        console.log('切换重复模式');
         const modes = ['none', 'all', 'one'];
         const currentIndex = modes.indexOf(playerState.repeatMode);
         playerState.repeatMode = modes[(currentIndex + 1) % modes.length];
@@ -710,8 +683,12 @@ document.addEventListener('DOMContentLoaded', function () {
         nextBtn.addEventListener('click', playNextTrack);
 
         shuffleBtn.addEventListener('click', toggleShuffle);
+        shuffleBtn.addEventListener('click', () => {
+           shuffleBtn.classList.toggle('active'); 
+        });
 
         repeatBtn.addEventListener('click', toggleRepeat);
+  
 
         favoriteBtn.addEventListener('click', toggleFavorite);
 
@@ -757,7 +734,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const playListBtn = document.querySelector('.btn-playlist');
     const playList = document.querySelector('.playlist');
 
-    playListBtn.addEventListener('click', () => {
+    playListBtn.addEventListener('click', (e) => {
+        console.log("歌单按钮被点击了");
+        e.stopPropagation(); 
         playList.classList.toggle('show');
     });
 
@@ -890,29 +869,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log("歌手热门歌曲:", songs);
 
                 if (songs && songs.length > 0) {
-                    // 将歌手热门歌曲添加到播放列表
-                    const newPlaylist = songs.map(song => {
-                        return {
-                            id: song.id,
-                            title: song.name,
-                            artist: song.ar.map(a => a.name).join(', '),
-                            cover: song.al.picUrl || './img/default-cover.jpg',
-                            audio: null,
-                            duration: song.dt / 1000
-                        };
-                    });
-
-                    //更新播放列表
-                    playerState.playlist = newPlaylist;
-                    playerState.currentTrackIndex = 0;
-
-                    //显示歌手详情页
                     showArtistDetail(singerId, singerName, songs);
-
-                    //更新播放列表
-
-                    updataPlaylistUI();
-                    showNotification(`已添加 ${singerName} 的热门歌曲到播放列表`);
                 } else {
                     showNotification("未找到该歌手的热门歌曲");
                 }
@@ -923,8 +880,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    let checkingMusicAbortController = null;
+
     //显示歌手详情页
     async function showArtistDetail(singerId, singerName, songs) {
+
+        //如果需要中断，就直接终端请求
+        if (checkingMusicAbortController) {
+            checkingMusicAbortController.abort();
+        }
+
+        checkingMusicAbortController = new AbortController();
+
         const mainContentAera = document.querySelector('.mainContentArea');
         const scrollPosition = mainContentAera.scrollTop;
 
@@ -969,6 +936,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                             <div class="col-album">${song.al.name}</div>
                             <div class="col-duration">${formatTime(song.dt / 1000)}</div>
+                            <div class="col-actions">
+                            <button class="btn-add-to-playlist" title="加入播放列表">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                                </svg>
+                            </button>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -979,73 +953,173 @@ document.addEventListener('DOMContentLoaded', function () {
         mainContentAera.innerHTML = detailHTML;
 
         mainContentAera.scrollTop = 0;
+        const style = document.createElement('style');
+        style.textContent = `
+            .song-row.unplayable {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            .unplayable-icon {
+                margin-left: 5px;
+                color: #ff5252;
+                display: inline-flex;
+                align-items: center;
+            }
+            .loading-songs {
+                text-align: center;
+                padding: 20px;
+                color: var(--text-secondary);
+            }
+            .checking-playable {
+                font-size: 12px;
+                color: #888;
+                margin-left: 5px;
+            }
+            .col-actions {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 50px;
+            }
+            .btn-add-to-playlist {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 5px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-secondary);
+                transition: background-color 0.2s, color 0.2s;
+            }
+            .btn-add-to-playlist:hover {
+                background-color: rgba(128, 128, 128, 0.2);
+                color: var(--accent-primary);
+            }
+            .song-row.unplayable .btn-add-to-playlist {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        `;
+        document.head.appendChild(style);
 
         document.querySelector('.back-button').addEventListener('click', () => {
+            if (checkingMusicAbortController) {
+                checkingMusicAbortController.abort();
+                checkingMusicAbortController = null;
+            }
+
             showSingersList();
         });
 
         document.querySelector('.play-all-btn').addEventListener('click', () => {
-            const firstPlayableIndex = playerState.playlist.findIndex(track => track.playable !== false);
-            if (firstPlayableIndex !== -1) {
-                loadAndPlayTrack(firstPlayableIndex);
+            const playableSongs = songs.filter((song, index) => !document.querySelectorAll('.song-row')[index].classList.contains('unplayable'));
+            if (playableSongs.length > 0) {
+                const newPlaylist = playableSongs.map(song => {
+                    return {
+                        id: song.id,
+                        title: song.name,
+                        artist: song.ar.map(a => a.name).join(', '),
+                        cover: song.al.picUrl || './img/crayon.jpg',
+                        audio: null,
+                        duration: song.dt / 1000,
+                        playable: true
+                    };
+                });
 
+                // 更新播放列表
+                playerState.playlist = newPlaylist;
+                playerState.currentTrackIndex = 0;
+
+                // 播放第一首
+                loadAndPlayTrack(0);
+                showNotification(`已添加 ${playableSongs.length} 首歌曲到播放列表`);
             } else {
-                showNotification("没有可播放的音乐");
+                showNotification('没有可播放的歌曲');
             }
         });
-        const style = document.createElement('style');
-        style.textContent = `
-        .song-row.unplayable {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .unplayable-icon {
-            margin-left: 5px;
-            color: #ff5252;
-            display: inline-flex;
-            align-items: center;
-        }
-        .loading-songs {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-secondary);
-        }
-        `;
-        document.head.appendChild(style);
         document.querySelectorAll('.song-row').forEach(row => {
-            row.addEventListener('click', () => {
-                const index = row.getAttribute('data-index');
+            row.addEventListener('click', (e) => {
+                if (e.target.closest('.btn-add-to-playlist')) {
+                    return;
+                }
                 if (row.classList.contains('unplayable')) {
                     showNotification('该歌曲无法播放');
                 } else {
-                    loadAndPlayTrack(index);
+                    const songIndex = parseInt(row.getAttribute('data-index'));
+                    const song = songs[songIndex];
+
+                    const singleSongPlaylist = [{
+                        id: song.id,
+                        title: song.name,
+                        artist: song.ar.map(a => a.name).join(', '),
+                        cover: song.al.picUrl || './img/crayon.jpg',
+                        audio: null,
+                        duration: song.dt / 1000,
+                        playable: true
+                    }];
+
+                    // 替换播放列表并播放
+                    playerState.playlist = singleSongPlaylist;
+                    playerState.currentTrackIndex = 0;
+                    loadAndPlayTrack(0);
+                }
+            });
+            const addToPlaylistBtn = row.querySelector('.btn-add-to-playlist');
+            addToPlaylistBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+    
+                if (row.classList.contains('unplayable')) {
+                    showNotification('无法添加不可播放的歌曲');
+                    return;
+                }
+    
+                const songIndex = parseInt(row.getAttribute('data-index'));
+                const song = songs[songIndex];
+    
+                const trackToAdd = {
+                    id: song.id,
+                    title: song.name,
+                    artist: song.ar.map(a => a.name).join(', '),
+                    cover: song.al.picUrl || './img/crayon.jpg',
+                    audio: null,
+                    duration: song.dt / 1000,
+                    playable: true
+                };
+    
+                // 检查歌曲是否已在列表中
+                const existingIndex = playerState.playlist.findIndex(track => track.id === trackToAdd.id);
+    
+                if (existingIndex !== -1) {
+                    showNotification('该歌曲已在播放列表中');
+                } else {
+                    playerState.playlist.push(trackToAdd);
+                    updataPlaylistUI();
+                    showNotification(`已添加《${song.name}》到播放列表`);
                 }
             });
         });
 
-        await checkMusicCanPlay(songs);
+     
+
+        await checkMusicCanPlay(songs, checkingMusicAbortController.signal);
 
         updataPlaylistUI();
     }
 
     //检查歌曲是否可以播放
 
-    async function checkMusicCanPlay(songs) {
-        playerState.playlist = songs.map(song => {
-            return {
-                id: song.id,
-                title: song.name,
-                artist: song.ar.map(a => a.name).join(', '),
-                cover: song.al.picUrl || './img/crayon.png',
-                audio: null,
-                duration: song.dt / 1000,
-                playable: true // 默认可播放
-            };
-        });
-
+    async function checkMusicCanPlay(songs, abortSignal) {
         const songRows = document.querySelectorAll('.song-row');
 
         for (let i = 0; i < songs.length; i++) {
+            //检查一下abort
+            if (abortSignal && abortSignal.aborted) {
+                return;
+            }
+
+
             const songId = songs[i].id;
             const songRow = songRows[i];
 
@@ -1058,8 +1132,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 const canPlay = await checkSingleMusicPlayable(songId);
-                playerState.playlist[i].playable = canPlay;
-                songRow.classList.toggle('unplayable', !canPlay);
                 checkingElement.remove();
 
 
@@ -1079,7 +1151,6 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
                 console.error('音乐播放不了:', error);
                 checkingElement.remove();
-                playerState.playlist[i].playable = false;
                 songRow.classList.add('unplayable');
 
                 const errorIcon = document.createElement('div');
@@ -1093,15 +1164,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 songNameElement.appendChild(errorIcon);
             }
 
-    
+
         }
     }
 
+    //缓存
+    let cachedSingers = null;
 
-        function showSingersList() {
-            const mainContentArea = document.querySelector('.mainContentArea');
+    function showSingersList() {
+        const mainContentArea = document.querySelector('.mainContentArea');
 
-            mainContentArea.innerHTML = `
+        mainContentArea.innerHTML = `
         <div class="classify">
             <div class="singerClassification">
                 <ul class="singerClassificationListByType">
@@ -1126,149 +1199,127 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="loading-indicator">加载中...</div>
         </div>
     `;
-            // 获取新的元素
-            const classifiedSinger = document.querySelector('.classified-singer');
+        // 获取新的元素
+        const classifiedSinger = document.querySelector('.classified-singer');
 
-            // 重新加载歌手列表
+        if (cachedSingers) {
+            renderSingers(cachedSingers, classifiedSinger);
+        } else {
+            // 只在没有缓存时请求数据
             getSingerByType(-1).then(res => {
-                let innerHTML = res.map((item) => {
-                    return `                   
+                cachedSingers = res;
+                renderSingers(res, classifiedSinger);
+            }).catch(error => {
+                console.error('获取歌手数据失败:', error);
+                classifiedSinger.innerHTML = '<div class="error-message">获取歌手数据失败，请稍后再试</div>';
+            });
+        }
+    }
+
+
+    //渲染歌手
+    function renderSingers(singers, container) {
+        let innerHTML = singers.map((item) => {
+            return `                   
                  <div class="singer-items">
                     <img src="${item.picUrl}" alt="${item.name}" loading="lazy">
                     <div class="singer-info">
                         <div class="singer-name" data-id="${item.id}">${item.name}</div>
                     </div>
                 </div>`
-                }).join('');
-                classifiedSinger.innerHTML = innerHTML;
+        }).join('');
+        container.innerHTML = innerHTML;
 
-                classifiedSinger.querySelectorAll('.singer-items').forEach(item => {
-                    item.addEventListener('click', async function () {
-                        const singerNameElement = this.querySelector('.singer-name');
-                        const singerId = singerNameElement.getAttribute('data-id');
-                        const singerName = singerNameElement.textContent;
+        addSingerClickEvents(container);
+    }
 
-                        showNotification(`正在加载 ${singerName} 的热门歌曲...`);
+    //添加歌手点击事件
+    function addSingerClickEvents(container) {
+        container.addEventListener('click', async (e) => {
+            const singerItem = e.target.closest('.singer-items');
+            if (!singerItem) return;
 
-                        try {
-                            // 获取歌手热门歌曲
-                            const songs = await getSingerHotSong(singerId);
+            const singerNameElement = singerItem.querySelector('.singer-name');
+            if (!singerNameElement) return;
 
-                            if (songs && songs.length > 0) {
-                                // 将歌手热门歌曲添加到播放列表
-                                const newPlaylist = songs.map(song => {
-                                    console.log(song.id);
+            const singerId = singerNameElement.getAttribute('data-id');
+            const singerName = singerNameElement.textContent;
 
-                                    return {
-                                        id: song.id,
-                                        title: song.name,
-                                        artist: song.ar.map(a => a.name).join(', '),
-                                        cover: song.al.picUrl || './img/default-cover.jpg',
-                                        audio: null,
-                                        duration: song.dt / 1000
-                                    };
-                                });
+            showNotification(`正在加载 ${singerName} 的热门歌曲...`);
 
-                                // 更新播放列表
-                                playerState.playlist = newPlaylist;
-                                playerState.currentTrackIndex = 0;
+           
+        });
+    }
 
-                                // 显示歌手详情页
-                                showArtistDetail(singerId, singerName, songs);
+    async function loadAndPlayTrack(index) {
+        const track = playerState.playlist[index];
+        playerState.currentTrackIndex = index;
+        console.log('播放:', track);
 
-                                // 更新播放列表
-                                updataPlaylistUI();
+        songTitle.textContent = track.title;
+        songArtist.textContent = track.artist;
+        musicCover.src = track.cover;
 
-                                showNotification(`已添加 ${singerName} 的热门歌曲到播放列表`);
-                            } else {
-                                showNotification("未找到该歌手的热门歌曲");
-                            }
-                        } catch (error) {
-                            console.error("获取歌手热门歌曲失败:", error);
-                            showNotification("获取歌手热门歌曲失败，请稍后再试");
-                        }
-                    });
-                });
-            }).catch(error => {
-                console.error('获取歌手数据失败:', error);
-                classifiedSinger.innerHTML = '<div class="error-message">获取歌手数据失败，请稍后再试</div>';
-            });
-
-
-        }
-
-
-
-        async function loadAndPlayTrack(index) {
-            const track = playerState.playlist[index];
-            playerState.currentTrackIndex = index;
-            console.log('播放:', track);
-
-            songTitle.textContent = track.title;
-            songArtist.textContent = track.artist;
-            musicCover.src = track.cover;
-
-            if (!track.audio) {
-                try {
-                    showNotification(`正在获取 ${track.title} 的音频...`);
-                    const songUrlData = await getSongUrlBySongId(track.id);
-                    if (songUrlData.data[0].url) {
-                        track.audio = songUrlData.data[0].url;
-                    }
-                    else {
-                        showNotification(`未找到 ${track.title} 的音频`);
-                        throw new Error(`未找到 ${track.title} 的音频`);
-                    }
-                } catch (err) {
-                    console.error('获取音频失败:', err);
-                    showNotification('获取音频失败，请稍后再试');
-                    if (playerState.playlist.length > index + 1) {
-                        setTimeout(() => loadAndPlayTrack(index + 1), 3000);
-
-                    }
-                    return;
-                }
-            }
-            audioPlayer.src = track.audio;
-            totalTimeEl.textContent = formatTime(track.duration);
-
-            progress.style.width = '0%';
-            progressHandle.style.left = '0%';
-            currentTimeEl.textContent = '0:00';
-
-            playAudio();
-
-            const playingIndicator = document.querySelector('.song-item.playing');
-            if (playingIndicator) {
-                playingIndicator.style.display = 'flex';
-            }
-
-            document.querySelectorAll('.song-row').forEach(row => {
-                const rowIndex = parseInt(row.getAttribute('data-index'));
-                if (rowIndex === index) {
-                    row.classList.add('playing');
+        if (!track.audio) {
+            try {
+                showNotification(`正在获取 ${track.title} 的音频...`);
+                const songUrlData = await getSongUrlBySongId(track.id);
+                if (songUrlData.data[0].url) {
+                    track.audio = songUrlData.data[0].url;
                 }
                 else {
-                    row.classList.remove('playing');
+                    showNotification(`未找到 ${track.title} 的音频`);
+                    throw new Error(`未找到 ${track.title} 的音频`);
                 }
-            })
+            } catch (err) {
+                console.error('获取音频失败:', err);
+                showNotification('获取音频失败，请稍后再试');
+                if (playerState.playlist.length > index + 1) {
+                    setTimeout(() => loadAndPlayTrack(index + 1), 3000);
+                }
+                return;
+            }
+        }
+        audioPlayer.src = track.audio;
+        totalTimeEl.textContent = formatTime(track.duration);
 
-            updataPlaylistUI();
+        progress.style.width = '0%';
+        progressHandle.style.left = '0%';
+        currentTimeEl.textContent = '0:00';
+
+        playAudio();
+
+        const playingIndicator = document.querySelector('.song-item.playing');
+        if (playingIndicator) {
+            playingIndicator.style.display = 'flex';
         }
 
-        function updataPlaylistUI() {
-            const playlistContent = document.querySelector('.play-list-content');
-            if (!playlistContent) return;
+        document.querySelectorAll('.song-row').forEach(row => {
+            const rowIndex = parseInt(row.getAttribute('data-index'));
+            if (rowIndex === index) {
+                row.classList.add('playing');
+            }
+            else {
+                row.classList.remove('playing');
+            }
+        })
 
-            playlistContent.innerHTML = '';
-            playerState.playlist.forEach((track, index) => {
-                const songItem = document.createElement('div');
-                songItem.className = 'song-items';
-                if (index === playerState.currentTrackIndex) {
-                    songItem.classList.add('active');
-                }
+        updataPlaylistUI();
+    }
 
-                songItem.innerHTML = `
+    function updataPlaylistUI() {
+        const playlistContent = document.querySelector('.play-list-content');
+        if (!playlistContent) return;
+
+        playlistContent.innerHTML = '';
+        playerState.playlist.forEach((track, index) => {
+            const songItem = document.createElement('div');
+            songItem.className = 'song-items';
+            if (index === playerState.currentTrackIndex) {
+                songItem.classList.add('active');
+            }
+
+            songItem.innerHTML = `
                 <img src="${track.cover}" alt="${track.title}">
                 <div class="song-info">
                     <span>${track.title}</span>
@@ -1283,296 +1334,296 @@ document.addEventListener('DOMContentLoaded', function () {
                     </svg>
                 </div>
             `;
-                songItem.addEventListener('click', (e) => {
-                    if (!e.target.closest('.delete')) {
-                        loadAndPlayTrack(index);
-                    }
-                });
+            songItem.addEventListener('click', (e) => {
+                if (!e.target.closest('.delete')) {
+                    loadAndPlayTrack(index);
+                }
+            });
 
-                const deleteBtn = songItem.querySelector('.delete');
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    removeFromPlaylist(index);
-                });
+            const deleteBtn = songItem.querySelector('.delete');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeFromPlaylist(index);
+            });
 
-                playlistContent.appendChild(songItem);
-            })
-        }
+            playlistContent.appendChild(songItem);
+        })
+    }
 
-        function removeFromPlaylist(index) {
-            if (index === playerState.currentTrackIndex) {
-                if (playerState.playlist.length === 1) {
-                    pauseAudio();
-                    playerState.playlist = [];
+    function removeFromPlaylist(index) {
+        if (index === playerState.currentTrackIndex) {
+            if (playerState.playlist.length === 1) {
+                pauseAudio();
+                playerState.playlist = [];
+                playerState.currentTrackIndex = 0;
+
+                // 重置信息
+                songTitle.textContent = '歌曲名称';
+                songArtist.textContent = '歌手名称';
+                musicCover.src = './img/crayon.jpg';
+                audioPlayer.src = '';
+                progress.style.width = '0%';
+                progressHandle.style.left = '0%';
+                currentTimeEl.textContent = '0:00';
+                totalTimeEl.textContent = '0:00';
+            } else {
+                playerState.playlist.splice(index, 1);
+                if (index >= playerState.playlist.length) {
                     playerState.currentTrackIndex = 0;
 
-                    // 重置信息
-                    songTitle.textContent = '歌曲名称';
-                    songArtist.textContent = '歌手名称';
-                    musicCover.src = './img/crayon.jpg';
-                    audioPlayer.src = '';
-                    progress.style.width = '0%';
-                    progressHandle.style.left = '0%';
-                    currentTimeEl.textContent = '0:00';
-                    totalTimeEl.textContent = '0:00';
-                } else {
-                    playerState.playlist.splice(index, 1);
-                    if (index >= playerState.playlist.length) {
-                        playerState.currentTrackIndex = 0;
-
-                    }
-                    loadAndPlayTrack(playerState.currentTrackIndex);
                 }
-            } else {
-                if (index < playerState.currentTrackIndex) {
-                    playerState.currentTrackIndex--;
-                }
-                playerState.playlist.splice(index, 1);
+                loadAndPlayTrack(playerState.currentTrackIndex);
             }
-            updataPlaylistUI();
-            showNotification('已从播放列表中移除歌曲');
+        } else {
+            if (index < playerState.currentTrackIndex) {
+                playerState.currentTrackIndex--;
+            }
+            playerState.playlist.splice(index, 1);
+        }
+        updataPlaylistUI();
+        showNotification('已从播放列表中移除歌曲');
+    }
+
+
+
+
+
+    showAuthModal();
+
+    // 显示登录/注册模态框
+    function showAuthModal() {
+        authModal.classList.add('show');
+        authBackdrop.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+
+    function hideAuthModal() {
+        authModal.classList.remove('show');
+        authBackdrop.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+
+    authTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabTarget = tab.getAttribute('data-tab');
+
+
+            authTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+
+            authForms.forEach(form => form.classList.remove('active'));
+            document.querySelector(`.${tabTarget}-form`).classList.add('active');
+        });
+    });
+
+    const userEmail = document.getElementById('user-email');
+    loginBtn.addEventListener('click', () => {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        // 前端验证
+        if (!validateEmail(email)) {
+            showInputError('loginEmail', '请输入有效的邮箱地址');
+            return;
         }
 
-
-
-
-
-        showAuthModal();
-
-        // 显示登录/注册模态框
-        function showAuthModal() {
-            authModal.classList.add('show');
-            authBackdrop.classList.add('show');
-            document.body.style.overflow = 'hidden';
+        if (!password.trim()) {
+            showInputError('loginPassword', '请输入密码');
+            return;
         }
 
+        // 显示登录中
+        loginBtn.textContent = '登录中...';
+        loginBtn.disabled = true;
 
-        function hideAuthModal() {
-            authModal.classList.remove('show');
-            authBackdrop.classList.remove('show');
-            document.body.style.overflow = '';
+        // 调用后端登录API
+        infoAPI.post('/api/auth/login', {
+            email: email,
+            password: password
+        }).then(response => {
+            console.log(response.data);
+            showNotification('登录成功！');
+
+            renderUserName(response.data.user);
+            // 修改用户邮箱信息
+            localStorage.setItem('token', response.data.token);
+            // console.log(localStorage.getItem('token'));
+            localStorage.setItem('userEmail', email);
+            userEmail.textContent = email;
+            hideAuthModal();
+            loginBtn.textContent = '登录';
+            loginBtn.disabled = false;
+        }).catch(error => {
+            console.error('登录失败:', error);
+            showNotification('登录失败，请检查邮箱和密码是否正确');
+            loginBtn.textContent = '登录';
+            loginBtn.disabled = false;
+        });
+    });
+
+    // 注册
+    registerBtn.addEventListener('click', () => {
+        const name = document.getElementById('registerName').value;
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const code = document.getElementById('verificationCode').value;
+
+
+        // 前端验证
+        let isValid = true;
+
+        if (!name.trim()) {
+            showInputError('registerName', '请输入用户名');
+            isValid = false;
         }
 
+        if (!validateEmail(email)) {
+            showInputError('registerEmail', '请输入有效的邮箱地址');
+            isValid = false;
+        }
 
-        authTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabTarget = tab.getAttribute('data-tab');
+        if (!validatePassword(password)) {
+            showInputError('registerPassword', '密码至少6位，且包含字母和数字');
+            isValid = false;
+        }
+
+        if (!code.trim() || code.length !== 6) {
+            showInputError('verificationCode', '请输入6位验证码');
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        // 显示注册中
+        registerBtn.textContent = '注册中...';
+        registerBtn.disabled = true;
+
+        // 调用后端注册API
+        //先发送验证码
+        console.log(name);
+        console.log(email);
+        console.log(password);
+        console.log(code);
 
 
-                authTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
+        infoAPI.post('/api/auth/register', {
+            username: name,
+            email: email,
+            password: password,
+            verificationCode: code
+        }).then(response => {
+            console.log(response.data);
+            showNotification('注册成功！');
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('userEmail', email);
+            userEmail.textContent = email;
+            hideAuthModal();
+            registerBtn.textContent = '注册';
+            registerBtn.disabled = false;
+        })
+    });
 
 
-                authForms.forEach(form => form.classList.remove('active'));
-                document.querySelector(`.${tabTarget}-form`).classList.add('active');
-            });
+
+    //退出登录
+
+    const logoutBtn = document.getElementById('logout');
+
+    logoutBtn.addEventListener('click', () => {
+        infoAPI.get('/api/auth/logout', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        }).then(response => {
+            console.log(response.data);
+            localStorage.removeItem('token');
+            showAuthModal();
+        }).catch(error => {
+            console.error('退出登录失败:', error);
         });
+    });
 
-        const userEmail = document.getElementById('user-email');
-        loginBtn.addEventListener('click', () => {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+    // 发送验证码
+    sendCodeBtn.addEventListener('click', () => {
+        const email = document.getElementById('registerEmail').value;
 
-            // 前端验证
-            if (!validateEmail(email)) {
-                showInputError('loginEmail', '请输入有效的邮箱地址');
-                return;
-            }
+        if (!validateEmail(email)) {
+            showInputError('registerEmail', '请输入有效的邮箱地址');
+            return;
+        }
 
-            if (!password.trim()) {
-                showInputError('loginPassword', '请输入密码');
-                return;
-            }
+        // 禁用按钮，开始倒计时
+        let countdown = 60;
+        sendCodeBtn.disabled = true;
+        sendCodeBtn.classList.add('disabled');
+        sendCodeBtn.textContent = `已发送(${countdown}s)`;
 
-            // 显示登录中
-            loginBtn.textContent = '登录中...';
-            loginBtn.disabled = true;
-
-            // 调用后端登录API
-            infoAPI.post('/api/auth/login', {
-                email: email,
-                password: password
-            }).then(response => {
-                console.log(response.data);
-                showNotification('登录成功！');
-
-                renderUserName(response.data.user);
-                // 修改用户邮箱信息
-                localStorage.setItem('token', response.data.token);
-                // console.log(localStorage.getItem('token'));
-                localStorage.setItem('userEmail', email);
-                userEmail.textContent = email;
-                hideAuthModal();
-                loginBtn.textContent = '登录';
-                loginBtn.disabled = false;
-            }).catch(error => {
-                console.error('登录失败:', error);
-                showNotification('登录失败，请检查邮箱和密码是否正确');
-                loginBtn.textContent = '登录';
-                loginBtn.disabled = false;
-            });
-        });
-
-        // 注册
-        registerBtn.addEventListener('click', () => {
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const code = document.getElementById('verificationCode').value;
-
-
-            // 前端验证
-            let isValid = true;
-
-            if (!name.trim()) {
-                showInputError('registerName', '请输入用户名');
-                isValid = false;
-            }
-
-            if (!validateEmail(email)) {
-                showInputError('registerEmail', '请输入有效的邮箱地址');
-                isValid = false;
-            }
-
-            if (!validatePassword(password)) {
-                showInputError('registerPassword', '密码至少6位，且包含字母和数字');
-                isValid = false;
-            }
-
-            if (!code.trim() || code.length !== 6) {
-                showInputError('verificationCode', '请输入6位验证码');
-                isValid = false;
-            }
-
-            if (!isValid) return;
-
-            // 显示注册中
-            registerBtn.textContent = '注册中...';
-            registerBtn.disabled = true;
-
-            // 调用后端注册API
-            //先发送验证码
-            console.log(name);
-            console.log(email);
-            console.log(password);
-            console.log(code);
-
-
-            infoAPI.post('/api/auth/register', {
-                username: name,
-                email: email,
-                password: password,
-                verificationCode: code
-            }).then(response => {
-                console.log(response.data);
-                showNotification('注册成功！');
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('userEmail', email);
-                userEmail.textContent = email;
-                hideAuthModal();
-                registerBtn.textContent = '注册';
-                registerBtn.disabled = false;
-            })
-        });
-
-
-
-        //退出登录
-
-        const logoutBtn = document.getElementById('logout');
-
-        logoutBtn.addEventListener('click', () => {
-            infoAPI.get('/api/auth/logout', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
-            }).then(response => {
-                console.log(response.data);
-                localStorage.removeItem('token');
-                showAuthModal();
-            }).catch(error => {
-                console.error('退出登录失败:', error);
-            });
-        });
-
-        // 发送验证码
-        sendCodeBtn.addEventListener('click', () => {
-            const email = document.getElementById('registerEmail').value;
-
-            if (!validateEmail(email)) {
-                showInputError('registerEmail', '请输入有效的邮箱地址');
-                return;
-            }
-
-            // 禁用按钮，开始倒计时
-            let countdown = 60;
-            sendCodeBtn.disabled = true;
-            sendCodeBtn.classList.add('disabled');
+        const timer = setInterval(() => {
+            countdown--;
             sendCodeBtn.textContent = `已发送(${countdown}s)`;
 
-            const timer = setInterval(() => {
-                countdown--;
-                sendCodeBtn.textContent = `已发送(${countdown}s)`;
-
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    sendCodeBtn.disabled = false;
-                    sendCodeBtn.classList.remove('disabled');
-                    sendCodeBtn.textContent = '发送验证码';
-                }
-            }, 1000);
-
-            // 调用后端发送验证码API
-            infoAPI.post('/api/auth/sendverificationcode', {
-                email: email
-            }).then(response => {
-                console.log(response.data);
-                showNotification('验证码已发送到邮箱，请查收');
-            }).catch(error => {
-                console.error('发送验证码失败:', error);
-                showNotification('发送验证码失败，请稍后再试');
-            })
-
-            console.log('发送验证码到:', email);
-        });
-
-        // 忘记密码
-        document.getElementById('forgotPassword').addEventListener('click', (e) => {
-            e.preventDefault();
-            showNotification('请联系管理员重置密码');
-        });
-
-        document.querySelectorAll('.auth-form input').forEach(input => {
-            input.addEventListener('focus', () => {
-                const formGroup = input.closest('.form-group');
-                if (formGroup.classList.contains('error')) {
-                    formGroup.classList.remove('error');
-                }
-            });
-        });
-
-        function showInputError(inputId, message) {
-            const input = document.getElementById(inputId);
-            const formGroup = input.closest('.form-group');
-
-            formGroup.classList.add('error');
-
-            let errorMessage = formGroup.querySelector('.error-message');
-            if (!errorMessage) {
-                errorMessage = document.createElement('div');
-                errorMessage.className = 'error-message';
-                formGroup.appendChild(errorMessage);
+            if (countdown <= 0) {
+                clearInterval(timer);
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.classList.remove('disabled');
+                sendCodeBtn.textContent = '发送验证码';
             }
+        }, 1000);
 
-            errorMessage.textContent = message;
-        }
+        // 调用后端发送验证码API
+        infoAPI.post('/api/auth/sendverificationcode', {
+            email: email
+        }).then(response => {
+            console.log(response.data);
+            showNotification('验证码已发送到邮箱，请查收');
+        }).catch(error => {
+            console.error('发送验证码失败:', error);
+            showNotification('发送验证码失败，请稍后再试');
+        })
 
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(String(email).toLowerCase());
-        }
-
-        function validatePassword(password) {
-            return password.length >= 6 && /[a-zA-Z]/.test(password) && /\d/.test(password);
-        }
+        console.log('发送验证码到:', email);
     });
+
+    // 忘记密码
+    document.getElementById('forgotPassword').addEventListener('click', (e) => {
+        e.preventDefault();
+        showNotification('请联系管理员重置密码');
+    });
+
+    document.querySelectorAll('.auth-form input').forEach(input => {
+        input.addEventListener('focus', () => {
+            const formGroup = input.closest('.form-group');
+            if (formGroup.classList.contains('error')) {
+                formGroup.classList.remove('error');
+            }
+        });
+    });
+
+    function showInputError(inputId, message) {
+        const input = document.getElementById(inputId);
+        const formGroup = input.closest('.form-group');
+
+        formGroup.classList.add('error');
+
+        let errorMessage = formGroup.querySelector('.error-message');
+        if (!errorMessage) {
+            errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            formGroup.appendChild(errorMessage);
+        }
+
+        errorMessage.textContent = message;
+    }
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    function validatePassword(password) {
+        return password.length >= 6 && /[a-zA-Z]/.test(password) && /\d/.test(password);
+    }
+});
