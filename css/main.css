@@ -1572,6 +1572,41 @@ body {
     opacity: 0.7; 
 }
 
+.btn-add-to-myplaylist {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    opacity: 0.7; 
+}
+
+.btn-add-to-myplaylist:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+    color: var(--accent-primary);
+    transform: scale(1.1);
+}
+
+.btn-add-to-myplaylist.active {
+    color: var(--accent-primary);
+}
+
+.btn-add-to-myplaylist.active:hover {
+    color: var(--accent-hover);
+}
+
+.btn-add-to-myplaylist.active svg {
+    color: var(--accent-primary);
+}
+
+
+
+
 .song-row:hover .btn-add-to-playlist {
     opacity: 1;
 }
@@ -1714,7 +1749,7 @@ body {
 
 .form-group small {
     display: block;
-    color: var(--text-secondary);
+    color: var (--text-secondary);
     font-size: 12px;
     margin-top: 5px;
 }
@@ -1965,6 +2000,18 @@ body {
     display: flex;
 }
 
+.modal-body .playlist-info {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.modal-body .playlist-info .favorite-btn{
+    margin-left: 10px;
+}
+.modal-body .playlist-info .defavorite-btn{
+    margin-left: 10px;
+}
+
 .playlist-items:hover {
     background-color: var(--bg-tertiary);
     transform: translateY(-5px);
@@ -1999,7 +2046,341 @@ body {
     width: 100px;
 }
 
-/* 歌单详情页，采用模态框进行展示 */
+/* 收藏按钮 */
+
+.favorite-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.defavorite-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.favorite-btn:hover {
+    background-color: rgba(251, 85, 60, 0.1);
+    transform: scale(1.05);
+    opacity: 1;
+}
+
+.defavorite-btn:hover {
+    background-color: rgba(251, 85, 60, 0.1);
+    transform: scale(1.05);
+    opacity: 1;
+}
+
+.favorite-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.defavorite-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.favorite-btn.active svg path {
+    fill: #FB553C;
+}
+
+
+.favorite-btn:active {
+    transform: scale(0.95);
+}
+
+.defavorite-btn:active {
+    transform: scale(0.95);
+}
+
+@keyframes heartBeat {
+    0% {
+        transform: scale(1);
+    }
+    14% {
+        transform: scale(1.3);
+    }
+    28% {
+        transform: scale(1);
+    }
+    42% {
+        transform: scale(1.3);
+    }
+    70% {
+        transform: scale(1);
+    }
+}
+
+.favorite-btn.animating {
+    animation: heartBeat 0.8s ease-in-out;
+}
+
+.defavorite-btn.animating {
+    animation: heartBeat 0.8s ease-in-out;
+}
 
 
 
+/* 取消收藏 */
+
+.btn-remove-favorite {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.btn-remove-favorite:hover {
+    background-color: rgba(251, 85, 60, 0.1);
+    transform: scale(1.05);
+    opacity: 1;
+}
+
+.btn-remove-favorite svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-remove-favorite:active {
+    transform: scale(0.95);
+}
+
+.empty-message{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: var(--text-secondary);
+}
+
+.playlist-items {
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.classified-playlist .playlist-items:hover .favorite-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    z-index: 5;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.playlist-items:hover .favorite-icon {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.classified-playlist .playlist-items:hover .favorite-icon:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+.favorite-icon.active .heart-icon path {
+    fill: #FB553C;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.3); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.3); }
+    70% { transform: scale(1); }
+}
+
+.favorite-icon.animating {
+    animation: heartBeat 0.8s ease-in-out;
+}
+
+.playlist-items:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+.favorite-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    z-index: 5;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.playlist-items:hover .favorite-icon {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.favorite-icon:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+.favorite-icon.active .heart-icon path {
+    fill: #FB553C;
+}
+
+/* 创建歌单模态框 */
+
+#createPlaylistModal .modal-content {
+    width: 400px;
+    max-width: 90%;
+    background-color: var(--bg-tertiary);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+}
+
+#createPlaylistModal .modal-content .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#createPlaylistModal .modal-content .modal-header h3 {
+    font-size: 20px;
+    margin: 0;
+}
+
+#createPlaylistModal .modal-content .close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+#createPlaylistModal .modal-content .close-btn:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+#createPlaylistModal .modal-content .close-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+#createPlaylistModal .modal-body{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+}
+
+#createPlaylistModal .modal-body .input-group{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+}
+
+#createPlaylistModal .modal-body .input-group label{
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+#createPlaylistModal .modal-body .input-group input{
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+#createPlaylistModal .modal-body .input-group input:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+}
+
+#createPlaylistModal .modal-body .input-group textarea{
+    height: 100px;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+    width: 100%;
+    resize: none;
+
+}
+
+#createPlaylistModal .modal-body .input-group textarea:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+}
+
+#createPlaylistModal .modal-body .input-group button{
+    margin-top: 10px;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+#createPlaylistModal .modal-body .input-group button:hover{
+    background-color: var(--accent-primary);
+    color: white;
+}
