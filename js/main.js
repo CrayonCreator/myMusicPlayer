@@ -3313,7 +3313,6 @@ document.addEventListener('DOMContentLoaded', function () {
         loadLyrics();
     }
 
-    // 修改loadLyrics函数，添加滚动事件监听
     async function loadLyrics() {
         const lyricsContainer = document.querySelector('.lyrics-container');
 
@@ -3364,18 +3363,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         }
 
-        // 在渲染歌词后添加滚动事件监听
         if (lyricsContainer) {
             lyricsContainer.addEventListener('scroll', function () {
                 // 用户开始滚动
                 userScrolling = true;
 
-                // 清除之前的定时器
                 if (scrollTimeout) {
                     clearTimeout(scrollTimeout);
                 }
 
-                // 设置新的定时器，3秒后恢复自动滚动
                 scrollTimeout = setTimeout(() => {
                     userScrolling = false;
                 }, 3000);
@@ -3399,13 +3395,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const seconds = parseInt(match[2]);
                 const milliseconds = parseInt(match[3]);
 
-                // 转换为秒
                 const timeInSeconds = minutes * 60 + seconds + milliseconds / 1000;
 
-                // 提取歌词文本内容
                 const text = line.replace(timeRegex, '').trim();
 
-                // 只添加非空文本的歌词
                 if (text) {
                     parsedLyrics.push({
                         time: timeInSeconds,
