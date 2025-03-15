@@ -17,36 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
         withCredentials: false,
     });
 
-
-    infoAPI.interceptors.request.use(
-        (config) => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                config.headers['Authorization'] = `Bearer ${token}`;
-            }
-            return config;
-        },
-        (error) => {
-            return Promise.reject(error);
-        }
-    );
-
-    // 添加响应拦截器处理401错误
-    infoAPI.interceptors.response.use(
-        (response) => {
-            return response;
-        },
-        (error) => {
-            if (error.response && error.response.status === 401) {
-                console.log('授权失败，请重新登录');
-                localStorage.removeItem('token');
-                showNotification('登录已过期，请重新登录');
-                showAuthModal();
-            }
-            return Promise.reject(error);
-        }
-    );
-
     const token = localStorage.getItem('token');
     const savedEmail = localStorage.getItem('userEmail');
 
@@ -199,7 +169,19 @@ document.addEventListener('DOMContentLoaded', function () {
             const myPlaylists = response.data.data;
             const myPlaylistsSection = document.querySelector('.my-playlists .section-content');
             if (myPlaylists.length === 0) {
-                myPlaylistsSection.innerHTML = '<div class="empty-message">暂无歌单</div>';
+                let innerHTML =
+                    `<div class="add-playlist" id="addPlaylist" data-modal="addPlaylist">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"></path>
+                        </svg>
+                        <span>创建歌单</span>
+                    </div>`
+                //绑定创建歌单按钮事件
+                myPlaylistsSection.innerHTML = innerHTML;
+                const addPlaylist = document.getElementById('addPlaylist');
+                addPlaylist.addEventListener('click', () => {
+                    openModal('createPlaylistModal');
+                });
                 return;
             }
             myPlaylistsSection.innerHTML = '';
@@ -639,33 +621,239 @@ document.addEventListener('DOMContentLoaded', function () {
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
+                const selectedOption = document.querySelector('#search-type option:checked');
+                const type = selectedOption.getAttribute('data-type');
+
+                console.log('搜索类型:', type);
                 e.preventDefault();
-                performSearch(searchInput.value);
+                performSearch(searchInput.value, type);
             }
         });
 
         const searchButton = document.querySelector('.search button');
         if (searchButton) {
             searchButton.addEventListener('click', (e) => {
+                const selectedOption = document.querySelector('#search-type option:checked');
+                const type = selectedOption.getAttribute('data-type');
+                console.log('搜索类型:', type);
+
                 e.preventDefault();
-                performSearch(searchInput.value);
+                performSearch(searchInput.value, type);
             });
         }
     }
 
-    // 搜索函数
-    function performSearch(query) {
+    // 搜索
+    function performSearch(query, type) {
         if (!query.trim()) return;
-
+        // type = 1 为单曲
+        // type = 1000 为歌单
+        // type = 1004 为MV
         console.log('搜索:', query);
+        if (type == 1) {
+            vercel.get(`/search?keywords=${query}&type=1`).then(res => {
+                console.log('搜索结果:', res.data.result.songs);
+                showSearchResults(res.data.result.songs, type);
+            }).catch(error => {
+                console.error('搜索失败:', error);
+                showNotification('搜索失败，请稍后再试');
+            });
+        }
+        else if (type == 1000) {
+            vercel.get(`/search?keywords=${query}&type=1000`).then(res => {
+                console.log('搜索结果:', res.data.result.playlists);
+                showSearchResults(res.data.result.playlists, type);
+            }
+            ).catch(error => {
+                console.error('搜索失败:', error);
+                showNotification('搜索失败，请稍后再试');
+            }
+            );
+        }
+        else if (type == 1004) {
+            vercel.get(`/search?keywords=${query}&type=1004`).then(res => {
+                console.log('搜索结果:', res.data.result.mvs);
+                showSearchResults(res.data.result.mvs, type);
+            }).catch(error => {
+                console.error('搜索失败:', error);
+                showNotification('搜索失败，请稍后再试');
+            });
+        }
 
-        // 这里添加实际的搜索逻辑
-
-        // 显示搜索结果或导航到搜索结果页面
-
-        // 搜索结果通知
         showNotification(`正在搜索: ${query}`);
     }
+
+    // 显示搜索结果
+
+    async function showSearchResults(results, type) {
+        if (type == 1) {
+            let innerHTML = '';
+            for (const song of results) {
+                let imgUrl = './img/crayon.jpg';
+                try {
+                    const songDetail = await vercel.get(`/song/detail?ids=${song.id}`).then(res => res.data.songs[0]);
+                    imgUrl = songDetail.al.picUrl || './img/crayon.jpg';
+                } catch (error) {
+                    console.error('获取歌曲封面失败:', error);
+                }
+                innerHTML += `
+                 <div class="search-result-item" data-id="${song.id}">
+                    <div class="search-result-info">
+                        <div class="search-result-img">
+                            <img src="${imgUrl}" alt="歌曲封面">
+                        </div>
+                       <div class="search-result-name">
+                        <div class="search-result-title">${song.name}</div>
+                        <div class="search-result-artist">${song.artists.map(a => a.name).join(', ')}</div>
+                       </div>
+                    </div>
+                </div>
+                `;
+            }
+            document.querySelector('.search-result').innerHTML = innerHTML;
+
+            //给每个歌曲绑定点击播放事件
+
+            document.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', async () => {
+                    const songId = item.getAttribute('data-id');
+                    console.log('播放歌曲:', songId);
+                    try {
+                        const songDetail = await vercel.get(`/song/detail?ids=${songId}`).then(res => res.data.songs[0]);
+                        const song = await vercel.get(`/song/url?id=${songId}`).then(res => res.data.data[0]);
+
+                        console.log('歌曲链接:', song.url);
+                        audioPlayer.src = song.url;
+
+                        songTitle.textContent = item.querySelector('.search-result-title').textContent;
+                        songArtist.textContent = item.querySelector('.search-result-artist').textContent;
+
+                        musicCover.src = songDetail.al.picUrl || './img/crayon.jpg';
+
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = 'block';
+                        audioPlayer.play();
+
+                        if (document.querySelector("#searchResultModal").classList.contains("show")) {
+                            document.querySelector("#searchResultModal").classList.remove("show");
+                            modalBackdrop.classList.remove("show");
+                        }
+                    } catch (error) {
+                        console.error('获取歌曲链接失败:', error);
+                        showNotification('获取歌曲链接失败，请稍后再试');
+                    }
+                });
+            });
+
+
+        }
+        if (type == 1000) {
+            let innerHTML = results.map(playlist => {
+                return `
+                  <div class="search-result-item" data-id="${playlist.id}">
+                        <div class="srearch-result-info">
+                            <div class="search-result-img">
+                                <img src="${playlist.coverImgUrl}" alt="歌单封面">
+                            </div>
+                            <div class="search-result-title">${playlist.name}</div>
+                        </div>
+                        <div class="search-result-author-info">
+                            <div class="search-result-author-img">
+                                <img src="${playlist.creator.avatarUrl}" alt="歌单作者头像">
+                            </div>
+                            <div class="search-result-artist">
+                            ${playlist.creator.nickname}
+                            </div>
+                        </div>
+                    </div>
+                `
+            }).join('');
+            document.querySelector('.search-result').innerHTML = innerHTML;
+
+            // 绑定歌单的点击事件：查看歌单详情
+            document.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', async () => {
+                    const playlistId = item.getAttribute('data-id');
+                    console.log('查看歌单:', playlistId);
+
+                    try {
+                        const playlistDetail = await vercel.get(`/playlist/detail?id=${playlistId}`).then(res => res.data.playlist);
+                        const songs = playlistDetail.tracks;
+                        showPlaylistDetail(playlistId, playlistDetail.name, songs);
+                        // 移除搜索结果模态框
+                        document.querySelector('#searchResultModal').classList.remove('show');
+                    } catch (error) {
+                        console.error('获取歌单详情失败:', error);
+                        showNotification('获取歌单详情失败，请稍后再试');
+                    }
+                });
+            });
+
+
+
+
+        }
+        if (type == 1004) {
+            let innerHTML = results.map(mv => {
+                return `
+                   <div class="search-result-item id="search-result-item-mv" data-id="${mv.id}">
+                        <div class="search-result-info" id="search-result-info-mv">
+                            <div class="search-result-img" id="search-result-img-mv">
+                                <img src="${mv.cover}" alt="MV封面">
+                            </div>
+                            <div class="search-result-title" id="search-result-title-mv">${mv.name}</div>
+                            <div class="search-result-artist" id="search-result-artist-mv">${mv.artists.map(a => a.name).join('，')}</div>
+                        </div>
+                    </div>
+                `
+            }).join('');
+            document.querySelector('.search-result').innerHTML = innerHTML;
+
+            // 绑定MV的点击事件：播放MV
+            document.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', async () => {
+                    const mvId = item.getAttribute('data-id');
+                    console.log('播放MV:', mvId);
+
+                    try {
+                        const mvDetail = await vercel.get(`/mv/detail?mvid=${mvId}`).then(res => res.data.data);
+                        const mvUrl = await vercel.get(`/mv/url?id=${mvId}`).then(res => res.data.data.url);
+                        console.log('MV链接:', mvUrl);
+
+                        showMVDetail(mvDetail, mvUrl);
+                    } catch (error) {
+                        console.error('获取MV链接失败:', error);
+                        showNotification('获取MV链接失败，请稍后再试');
+                    }
+                });
+            });
+        }
+
+        document.querySelector('#searchResultModal').classList.add('show');
+        modalBackdrop.classList.add('show');
+
+
+
+    }
+    //播放mv的函数
+
+    function showMVDetail(mv, url) {
+        const mvDetail = document.querySelector('#mvDetailModal');
+        const mvTitle = mvDetail.querySelector('.mv-title');
+        const mvArtist = mvDetail.querySelector('.mv-artist');
+        const mvCover = mvDetail.querySelector('.mv-cover img');
+        const mvPlayer = mvDetail.querySelector('#mv-player');
+
+        mvTitle.textContent = mv.name;
+        mvArtist.textContent = mv.artistName;
+        mvCover.src = mv.cover;
+        mvPlayer.src = url;
+
+        mvDetail.classList.add('show');
+        modalBackdrop.classList.add('show');
+    }
+
+
 
     // 加载已保存的主题
     const currentTheme = localStorage.getItem('theme');
@@ -731,7 +919,7 @@ document.addEventListener('DOMContentLoaded', function () {
         isShuffled: false,
         repeatMode: 'none', // 'none', 'all', 'one'
         isFavorite: false,
-        volume: 0.7,
+        volume: 0.6,
         currentTrackIndex: 0,
         playlist: [
 
@@ -1734,8 +1922,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 currentSelectedSongId = songId;
+                closeAllModals();
+                setTimeout(() => {
+                    showAddToPlaylistModal(songId);
+                }, 100);
 
-                showAddToPlaylistModal(songId);
             });
         });
 
@@ -1748,10 +1939,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function showAddToPlaylistModal(songId) {
         const addToPlaylistModal = document.getElementById('addToPlaylistModal');
-        const userPlaylistsContainer = document.querySelector('.user-playlists-container');
+
+        if (!addToPlaylistModal) {
+            console.error('找不到添加到歌单模态框');
+            return;
+        }
+
+        currentSelectedSongId = songId;
 
         loadUserPlaylists().then(() => {
-            openModal('addToPlaylistModal');
+            document.querySelectorAll('.modal').forEach(modal => {
+                if (modal.id !== 'addToPlaylistModal') {
+                    modal.classList.remove('show');
+                }
+            });
+
+            addToPlaylistModal.classList.add('show');
+            modalBackdrop.classList.add('show');
         });
     }
 
@@ -2200,7 +2404,7 @@ document.addEventListener('DOMContentLoaded', function () {
             playingIndicator.style.display = 'flex';
         }
 
-   
+
         // 检查歌曲是否已收藏
         if (track.id) {
             checkIfSongIsFavorite(track.id);

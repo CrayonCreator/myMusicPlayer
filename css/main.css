@@ -97,6 +97,7 @@
     box-sizing: border-box;
 }
 
+
 ul {
     list-style: none;
 }
@@ -186,7 +187,7 @@ body {
 .aside-bar .section-content {
     max-height: 0;
     overflow: auto;
-    transition: max-height 0.3s ease;
+    transition: max-height 0.5s ease;
     scrollbar-width: thin;
     scrollbar-color: var(--accent-primary) transparent;
 }
@@ -195,8 +196,14 @@ body {
     max-height: 300px;
 }
 
-.collect-playlists .section-content.show{
-    height: 200px;
+.collect-playlists .section-content.show {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.my-playlists .section-content.show {
+    max-height: 200px; 
+    overflow-y: auto;
 }
 
 .aside-bar .item {
@@ -348,7 +355,7 @@ body {
     flex-grow: 1;
 }
 
-.modal-body .playlist-info{
+.modal-body .playlist-info {
     display: flex;
 }
 
@@ -378,7 +385,7 @@ body {
     gap: 15px;
 }
 
-.song-info{
+.song-info {
     display: flex;
     gap: 10px;
 }
@@ -467,71 +474,106 @@ body {
 .search {
     position: relative;
     flex: 1;
-    max-width: 400px;
-    /* 灵活变化大小 */
+    max-width: 520px;
+    margin-right: 20px;
 }
 
 .search label {
     display: flex;
     position: relative;
+    align-items: center;
+    width: 100%;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+    z-index: 2;
 }
 
 .search input {
-    width: 100%;
-    padding: 10px 15px;
-    padding-left: 40px;
+    flex: 1;
+    height: 40px;
+    padding: 8px 15px 8px 40px;
     background-color: var(--bg-tertiary);
     border: 1px solid transparent;
-    border-radius: 20px;
+    border-radius: 20px 0 0 20px;
     color: var(--text-primary);
     font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-.search input::placeholder {
-    color: var(--text-tertiary);
+    transition: all 0.3s ease;
+    width: 100%;
 }
 
 .search input:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 2px rgba(116, 132, 148, 0.2);
+    box-shadow: 0 0 0 2px rgba(116, 132, 148, 0.15);
 }
 
-.search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    pointer-events: none;
+.search input::placeholder {
+    color: var(--text-tertiary);
+    opacity: 0.8;
+}
+
+#search-type {
+    height: 40px;
+    padding: 0 10px;
+    border: none;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 13px;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+    border-left: 1px solid var(--border-color);
+    background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 28px;
+    transition: all 0.3s ease;
+}
+
+#search-type:focus {
+    outline: none;
 }
 
 .search button {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
+    height: 40px;
+    padding: 0 20px;
     background-color: var(--accent-primary);
     color: white;
     border: none;
-    border-radius: 16px;
-    padding: 6px 15px;
-    font-size: 13px;
+    border-radius: 0 20px 20px 0;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
-    opacity: 0;
-    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
-.search input:focus+button,
-.search input:not(:placeholder-shown)+button {
-    opacity: 1;
-    visibility: visible;
+.search:hover input,
+.search:hover #search-type,
+.search:hover button {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
+
 
 .search button:hover {
     background-color: var(--accent-hover);
+}
+
+.search button:active {
+    transform: scale(0.98);
+}
+
+.search option {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+
 }
 
 /* 右侧工具栏样式 */
@@ -788,7 +830,7 @@ body {
 
 .user-menu div {
     width: 100%;
-    
+
 }
 
 .user-menu .avator {
@@ -808,7 +850,7 @@ body {
     justify-content: center;
 }
 
-.user-menu .user-email{
+.user-menu .user-email {
     font-size: 14px;
     font-weight: 500;
     color: var(--text-primary);
@@ -836,7 +878,7 @@ body {
     background-color: var(--accent-hover);
 }
 
-.user-menu .logout span{
+.user-menu .logout span {
     color: white;
 }
 
@@ -1557,7 +1599,7 @@ body {
     object-fit: cover;
 }
 
-.col-actions{
+.col-actions {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1574,7 +1616,7 @@ body {
     justify-content: center;
     color: var(--text-secondary);
     transition: all 0.2s ease;
-    opacity: 0.7; 
+    opacity: 0.7;
 }
 
 .btn-add-to-myplaylist {
@@ -1588,7 +1630,7 @@ body {
     justify-content: center;
     color: var(--text-secondary);
     transition: all 0.2s ease;
-    opacity: 0.7; 
+    opacity: 0.7;
 }
 
 .btn-add-to-myplaylist:hover {
@@ -1897,17 +1939,17 @@ body {
     display: block;
 }
 
-.btn-repeat.mode-one{
+.btn-repeat.mode-one {
     background-color: var(--accent-primary);
     color: var(--bg-primary);
 }
 
-.btn-repeat.mode-all{
+.btn-repeat.mode-all {
     background-color: var(--accent-primary);
     color: var(--warning);
 }
 
-.btn-shuffle.active{
+.btn-shuffle.active {
     background-color: var(--accent-primary);
     color: var(--bg-primary);
 }
@@ -1920,7 +1962,7 @@ body {
 
 /* 精品歌单的展示 */
 
-.playlistClassification{
+.playlistClassification {
     display: flex;
     gap: 10px;
     padding: 10px;
@@ -1928,7 +1970,8 @@ body {
     height: 80px;
     align-items: center;
     position: relative;
-    margin-top: 35px;;
+    margin-top: 35px;
+    ;
 }
 
 .playlistClassification ul {
@@ -2010,10 +2053,11 @@ body {
     margin-left: 10px;
 }
 
-.modal-body .playlist-info .favorite-btn{
+.modal-body .playlist-info .favorite-btn {
     margin-left: 10px;
 }
-.modal-body .playlist-info .defavorite-btn{
+
+.modal-body .playlist-info .defavorite-btn {
     margin-left: 10px;
 }
 
@@ -2032,7 +2076,7 @@ body {
     justify-content: center;
 }
 
-.playlist-items .playlist-info .playlist-name{
+.playlist-items .playlist-info .playlist-name {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -2040,7 +2084,7 @@ body {
     text-align: center;
 }
 
-.playlist-description{
+.playlist-description {
     font-size: 12px;
     color: var(--text-secondary);
     display: -webkit-box;
@@ -2120,15 +2164,19 @@ body {
     0% {
         transform: scale(1);
     }
+
     14% {
         transform: scale(1.3);
     }
+
     28% {
         transform: scale(1);
     }
+
     42% {
         transform: scale(1.3);
     }
+
     70% {
         transform: scale(1);
     }
@@ -2175,7 +2223,7 @@ body {
     transform: scale(0.95);
 }
 
-.empty-message{
+.empty-message {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -2223,11 +2271,25 @@ body {
 }
 
 @keyframes heartBeat {
-    0% { transform: scale(1); }
-    14% { transform: scale(1.3); }
-    28% { transform: scale(1); }
-    42% { transform: scale(1.3); }
-    70% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    14% {
+        transform: scale(1.3);
+    }
+
+    28% {
+        transform: scale(1);
+    }
+
+    42% {
+        transform: scale(1.3);
+    }
+
+    70% {
+        transform: scale(1);
+    }
 }
 
 .favorite-icon.animating {
@@ -2320,26 +2382,26 @@ body {
     height: 20px;
 }
 
-#createPlaylistModal .modal-body{
+#createPlaylistModal .modal-body {
     display: flex;
     flex-direction: column;
     gap: 20px;
 
 }
 
-#createPlaylistModal .modal-body .input-group{
+#createPlaylistModal .modal-body .input-group {
     display: flex;
     flex-direction: column;
     gap: 10px;
 
 }
 
-#createPlaylistModal .modal-body .input-group label{
+#createPlaylistModal .modal-body .input-group label {
     font-size: 14px;
     color: var(--text-secondary);
 }
 
-#createPlaylistModal .modal-body .input-group input{
+#createPlaylistModal .modal-body .input-group input {
     padding: 12px 15px;
     border: 1px solid var(--border-color);
     background-color: var(--bg-primary);
@@ -2354,7 +2416,7 @@ body {
     outline: none;
 }
 
-#createPlaylistModal .modal-body .input-group textarea{
+#createPlaylistModal .modal-body .input-group textarea {
     height: 100px;
     padding: 12px 15px;
     border: 1px solid var(--border-color);
@@ -2373,7 +2435,7 @@ body {
     outline: none;
 }
 
-#createPlaylistModal .modal-body .input-group button{
+#createPlaylistModal .modal-body .input-group button {
     margin-top: 10px;
     padding: 12px;
     border: none;
@@ -2385,12 +2447,12 @@ body {
     transition: all 0.3s;
 }
 
-#createPlaylistModal .modal-body .input-group button:hover{
+#createPlaylistModal .modal-body .input-group button:hover {
     background-color: var(--accent-primary);
     color: white;
 }
 
-#createPlaylistModal .modal-body .input-group button:hover{
+#createPlaylistModal .modal-body .input-group button:hover {
     background-color: var(--accent-primary);
     color: white;
 }
@@ -2473,11 +2535,11 @@ body {
     color: var(--text-secondary);
 }
 
-.item{
+.item {
     position: relative;
 }
 
-.item .delete-playlist{
+.item .delete-playlist {
     background: transparent;
     border: none;
     cursor: pointer;
@@ -2588,7 +2650,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .lyrics-line.active::after {
@@ -2603,20 +2667,243 @@ body {
 #lyricsModalContent {
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent;
 }
 
+
+
 .lyrics-container::-webkit-scrollbar {
-    display: none; 
+    display: none;
 }
 
 .lyrics-container {
-    -ms-overflow-style: none;  
-    scrollbar-width: none;  
+    -ms-overflow-style: none;
+    scrollbar-width: none;
     padding: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     height: 100%;
     text-align: center;
+}
+
+/* 搜索结果的展示样式 */
+
+.search-result {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 3px solid var(--border-color);
+}
+
+.modal-body {
+    scrollbar-width: thin;
+}
+
+.search-result .search-result-item {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-result .search-result-item:hover {
+    background-color: var(--bg-player);
+}
+
+.search-result-author-img {
+    position: relative;
+}
+
+.search-result .search-result-item .search-result-author-img img {
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+    object-fit: cover;
+    display: flex;
+    position: absolute;
+    right: 0;
+}
+
+.search-result-artist {
+    position: relative;
+    margin-right: 50px;
+    font-weight: 600;
+}
+
+
+.search-result .search-result-item img {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    object-fit: cover;
+    display: flex;
+}
+
+.search-result-name {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    margin-left: 20px;
+    justify-content: center;
+}
+
+.search-result .search-result-item .search-result-info {
+    display: flex;
+    gap: 0px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.search-result .search-result-item .search-result-info .search-result-title {
+    font-size: 16px;
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.search-result-title {
+    font-weight: 600;
+}
+
+
+
+#mvDetailModal .modal-content {
+    width: 80vw;
+    max-width: 900px;
+    height: auto;
+    max-height: 90vh;
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+
+}
+
+#mvDetailModal .modal-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#mvDetailModal .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+#mvDetailModal .modal-body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.mv-video {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+    background-color: #000;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    border-radius: 0;
+}
+
+.mv-video:hover {
+    background-color: #000 !important;
+}
+
+.mv-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 0;
+    margin: 0;
+    display: block;
+}
+
+.mv-info-container {
+    display: flex;
+    padding: 20px;
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent;
+}
+
+.mv-cover {
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+}
+
+.mv-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mv-text-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.mv-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    width: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mv-artist {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+#search-result-title-mv {
+    font-size: 20px;
+    font-weight: 600;
+    margin-left: 20px;
+}
+
+#search-result-artist-mv{
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+#search-result-info-mv{
+    display: flex;
+    align-items: center;
 }

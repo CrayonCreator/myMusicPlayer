@@ -198,7 +198,13 @@
                                 d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
                                 fill="currentColor"></path>
                         </svg>
-                        <input type="text" placeholder="搜索音乐、艺术家或专辑">
+                        <input type="text" placeholder="搜索单曲 歌单 MV">
+                        <!-- 想要搜索的内容选择框 -->
+                        <select name="search-type" id="search-type">
+                            <option value="music" data-type="1">单曲</option>
+                            <option value="artist" data-type="1000">歌单</option>
+                            <option value="album" data-type="1004">MV</option>
+                        </select>
                         <button type="submit">搜索</button>
                     </label>
                 </div>
@@ -394,7 +400,7 @@
                             </div>
                         </div>
                     </div>
-            
+
                 </div>
                 <!-- 歌单详情模态框 -->
                 <div class="modal" id="playlistModal">
@@ -450,6 +456,94 @@
                                 </div>
                                 <div class="input-group">
                                     <button type="submit" id="createPlaylistBtn">创建歌单</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 搜索结果模态框 -->
+                <div class="modal" id="searchResultModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>搜索结果</h3>
+                            <button class="close-modal">
+                                <svg viewBox="0 0 24 24" width="24" height="24">
+                                    <path
+                                        d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
+                                        fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="search-result">
+                                <!-- 歌曲模板 -->
+
+                                <div class="search-result-item" data-id="111">
+                                    <div class="search-result-info">
+                                        <div class="search-result-title">歌曲名称</div>
+                                        <div class="search-result-artist">歌手名称</div>
+                                    </div>
+                                </div>
+                                <!-- 歌单模板 -->
+
+                                <div class="search-result-item" data-id="111">
+                                    <div class="srearch-result-info">
+                                        <div class="search-result-img">
+                                            <img src="./img/crayon.jpg" alt="歌单封面">
+                                        </div>
+                                        <div class="search-result-title">歌单名称</div>
+                                    </div>
+                                    <div class="search-result-author-info">
+                                        <div class="search-result-author-img">
+                                            <img class="author-img" src="./img/crayon.jpg" alt="歌单作者头像">
+                                            <span>歌单作者</span>
+                                        </div>
+                                   
+                                    </div>
+                                </div>
+                                <!-- MV模板 -->
+
+                                <div class="search-result-item" data-id="111">
+                                    <div class="search-result-info">
+                                        <div class="search-result-img">
+                                            <img src="./img/crayon.jpg" alt="MV封面">
+                                        </div>
+                                        <div class="search-result-title">MV名称</div>
+                                        <div class="search-result-artist">MV描述</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <!-- 播放mv模态框 -->
+
+                <div class="modal" id="mvDetailModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>播放MV</h3>
+                            <button class="close-modal">
+                                <svg viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z" fill="currentColor"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mv-video">
+                                <video id="mv-player" src="" controls></video>
+                            </div>
+                            <div class="mv-info-container">
+                                <div class="mv-cover">
+                                    <img src="./img/crayon.jpg" alt="MV封面">
+                                </div>
+                                <div class="mv-text-info">
+                                    <div class="mv-title">MV标题</div>
+                                    <div class="mv-artist">
+                                        <span>演唱者名称</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -576,11 +670,7 @@
                                     d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
                                     fill="currentColor" />
                             </svg>
-                            <svg class="icon-mute" viewBox="0 0 24 24" width="19" height="19" style="display: none;">
-                                <path
-                                    d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"
-                                    fill="currentColor" />
-                            </svg>
+                            <svg class="icon-mute" t="1742043120663" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4409" width="19" height="19"><path d="M412.032 592l-44.992 46.016a197.376 197.376 0 0 1-35.008-59.008A189.248 189.248 0 0 1 320 512V256c1.344-54.656 20.032-100.032 56-136C412.032 84.032 457.28 65.344 512 64c54.72 1.344 100.032 20.032 136 56 36.032 35.968 54.656 81.28 56 136v44.032l-64 64V256c-0.64-36.032-13.12-66.176-37.504-90.496C578.176 141.184 548.032 128.704 512 128c-35.968 0.64-66.176 13.184-90.496 37.504-24.32 24.32-36.8 54.528-37.504 90.496v256c0.64 30.72 9.984 57.344 28.032 80z m51.968 39.04a126.656 126.656 0 0 0 119.488-12.992A127.68 127.68 0 0 0 640.128 512v-56.96l64-64V512a189.632 189.632 0 0 1-96 166.016 187.776 187.776 0 0 1-95.488 26.048c-33.664 0-65.856-8.32-96.512-25.024l48-48z m-148.992 148.992l46.08-46.08A222.144 222.144 0 0 0 480 768h64c63.36-1.344 116.16-23.168 158.464-65.536 42.368-42.24 64.192-95.104 65.536-158.464V512c0-9.344 2.944-17.024 8.96-23.04a31.168 31.168 0 0 1 23.04-8.96c9.344 0 17.024 3.008 23.04 8.96 5.952 6.016 8.96 13.696 8.96 23.04v32c-2.048 81.344-30.208 149.12-84.48 203.52-54.4 54.272-122.24 82.432-203.52 84.48v64h64c9.344 0 17.024 3.008 23.04 8.96 5.952 6.016 8.96 13.696 8.96 23.04a31.168 31.168 0 0 1-8.96 23.04 31.168 31.168 0 0 1-23.04 8.96h-192a31.168 31.168 0 0 1-23.04-8.96 31.168 31.168 0 0 1-8.96-23.04c0-9.344 3.008-17.024 8.96-23.04a31.168 31.168 0 0 1 23.04-8.96h64v-64c-30.72 0-60.032-4.48-88-13.504a278.4 278.4 0 0 1-76.992-38.464z m-48-42.048A286.272 286.272 0 0 1 192 544V512c0-9.344 3.008-16.96 8.96-22.976a31.168 31.168 0 0 1 23.04-8.96c9.344 0 17.024 2.944 23.04 8.96 5.952 6.016 8.96 13.632 8.96 23.04v32c0 28.608 4.992 55.488 15.04 80.512 9.984 24.96 23.68 47.488 40.96 67.456l-44.992 45.952zM151.04 859.008a32.832 32.832 0 0 1-22.528 8.96 30.272 30.272 0 0 1-22.016-9.472 32 32 0 0 1-9.984-22.016 30.848 30.848 0 0 1 8.512-22.464l704-709.056a32.832 32.832 0 0 1 22.464-8.96c8.32 0 15.68 3.2 22.016 9.536a32.512 32.512 0 0 1 1.536 45.44l-704 708.032z" fill="#000000" p-id="4410"></path></svg>
                         </button>
                         <div class="volume-slider">
                             <div class="volume-bar">
@@ -698,7 +788,7 @@
             <div class="modal-content">
             </div>
         </div>
-        
+
         <!-- 添加到歌单模态框 -->
         <div class="modal" id="addToPlaylistModal">
             <div class="modal-content">
@@ -706,7 +796,9 @@
                     <h3>添加到歌单</h3>
                     <button class="close-modal">
                         <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z" fill="currentColor"></path>
+                            <path
+                                d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
+                                fill="currentColor"></path>
                         </svg>
                     </button>
                 </div>
@@ -733,7 +825,9 @@
                     <h3>歌词</h3>
                     <button class="close-modal">
                         <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="currentColor"/>
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+                                fill="currentColor" />
                         </svg>
                     </button>
                 </div>
@@ -746,8 +840,8 @@
 
         <script src="./js/axios.js"></script>
         <script src="./js/main.js"></script>
-        
-    
+
+
 </body>
 
 </html>
