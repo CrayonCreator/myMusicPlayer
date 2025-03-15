@@ -185,12 +185,18 @@ body {
 
 .aside-bar .section-content {
     max-height: 0;
-    overflow: hidden;
+    overflow: auto;
     transition: max-height 0.3s ease;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent;
 }
 
 .aside-bar .section-content.show {
     max-height: 300px;
+}
+
+.collect-playlists .section-content.show{
+    height: 200px;
 }
 
 .aside-bar .item {
@@ -2383,4 +2389,113 @@ body {
 #createPlaylistModal .modal-body .input-group button:hover{
     background-color: var(--accent-primary);
     color: white;
+}
+
+#createPlaylistModal .modal-body .input-group button:hover{
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+
+#addToPlaylistModal .modal-content {
+    width: 400px;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+#addToPlaylistModal .modal-body {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.playlist-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.create-new-playlist-option {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px dashed var(--border-color);
+}
+
+.create-new-playlist-option:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.create-new-playlist-option svg {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    color: var(--accent-primary);
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.playlist-item:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.playlist-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.playlist-item-info {
+    flex: 1;
+}
+
+.playlist-item-name {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.playlist-item-count {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.item{
+    position: relative;
+}
+
+.item .delete-playlist{
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    opacity: 0.7;
+    position: absolute;
+    right: 5px;
+}
+
+.item .delete-playlist:hover {
+    background-color: transparent;
+    transform: scale(1.1);
+    opacity: 1;
 }
