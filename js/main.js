@@ -104,6 +104,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    function resetCreatePlaylistForm() {
+        document.getElementById('playlistName').value = '';
+        document.getElementById('playlistDescription').value = '';
+    }
+
 
     const createPlaylistBtn = document.getElementById('createPlaylistBtn');
     createPlaylistBtn.addEventListener('click', async (e) => {
@@ -136,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 updateMyPlaylists(token);
+                resetCreatePlaylistForm();
                 closeAllModals();
             } else {
                 showNotification('创建歌单失败');
@@ -1201,38 +1207,28 @@ document.addEventListener('DOMContentLoaded', function () {
         visualizationActive = true;
 
         if (!track.audio) {
+            showNotification('当前歌曲音频资源不可用');
+            return;
         } else if (!track.audio.startsWith('http://localhost:3001')) {
             track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(track.audio)}`;
-            const wasPaused = audioPlayer.paused;
-            const savedTime = currentTime;
-            console.log(savedTime);
-
-            audioPlayer.crossOrigin = "anonymous";
-
-            const setTimeAndPlay = function () {
-                audioPlayer.currentTime = savedTime;
-
-                if (!wasPaused) {
-                    audioPlayer.play().catch(error => {
-                        console.error('尝试恢复播放失败:', error);
-                    });
-                }
-
-                audioPlayer.removeEventListener('canplay', setTimeAndPlay);
-            };
-
-            audioPlayer.addEventListener('canplay', setTimeAndPlay);
-
-            audioPlayer.src = track.audio;
         }
+        audioPlayer.crossOrigin = "anonymous"; 
 
+
+        if (audioPlayer.src !== track.audio) {
+            audioPlayer.src = track.audio;
+            
+            if (wasPlaying) {
+                await audioPlayer.play().catch(err => console.error('重新播放失败:', err));
+            }
+        }
         try {
             // 创建新的音频上下文
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
             // 创建分析器
             analyser = audioContext.createAnalyser();
-            analyser.fftSize = 1024;
+            analyser.fftSize = 512;
 
             // 创建音频源并连接
             audioSource = audioContext.createMediaElementSource(audioPlayer);
@@ -1279,9 +1275,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 for (let i = 0; i < bufferLength; i++) {
                     const barHeight = dataArray[i] * 1.5;
 
-                    const r = 220 - (dataArray[i] / 5); 
-                    const g = 180 + (dataArray[i] / 3); 
-                    const b = 250 - ((i / bufferLength) * 100); 
+                    const r = 220 - (dataArray[i] / 5);
+                    const g = 180 + (dataArray[i] / 3);
+                    const b = 250 - ((i / bufferLength) * 100);
 
                     canvasCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
                     canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
@@ -1627,6 +1623,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (songUrlData.data[0].url) {
                     const originalUrl = songUrlData.data[0].url;
                     track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(originalUrl)}`;
+                    audioPlayer.crossOrigin = "anonymous";
                 }
                 else {
                     showNotification(`未找到 ${track.title} 的音频`);
@@ -1640,6 +1637,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 return;
             }
+        } else if (!track.audio.includes('/proxy-audio?url=')) {
+            track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(track.audio)}`;
+            audioPlayer.crossOrigin = "anonymous";
         }
         audioPlayer.src = track.audio;
         totalTimeEl.textContent = formatTime(track.duration);
