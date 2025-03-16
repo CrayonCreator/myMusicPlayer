@@ -10,6 +10,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const registerBtn = document.getElementById('registerBtn');
     const sendCodeBtn = document.getElementById('sendCodeBtn');
 
+    document.querySelector('#visualizerModal .close-modal').addEventListener('click', () => {
+        const modal = document.getElementById('visualizerModal');
+        modal.classList.remove('show');
+        modalBackdrop.classList.remove('show');
+        document.body.style.overflow = '';
+    });
+
     const userName = document.getElementById('user-name');
     const infoAPI = axios.create({
         baseURL: 'http://47.99.53.155:5000',
@@ -894,6 +901,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const shuffleBtn = document.querySelector('.btn-shuffle');
     const repeatBtn = document.querySelector('.btn-repeat');
     const favoriteBtn = document.querySelector('.btn-favorite');
+    const audioVisualizationBtn = document.querySelector('.btn-audioVisualization')
     const heartIcon = document.querySelector('.icon-heart');
     const heartFilledIcon = document.querySelector('.icon-heart-filled');
     const volumeBtn = document.querySelector('.btn-volume');
@@ -1025,6 +1033,8 @@ document.addEventListener('DOMContentLoaded', function () {
             playIcon.style.display = 'none';
             pauseIcon.style.display = 'block';
             musicCover.classList.add('playing');
+            visualization();
+
         }).catch(error => {
             console.error('播放失败:', error);
         });
@@ -1037,6 +1047,7 @@ document.addEventListener('DOMContentLoaded', function () {
         playIcon.style.display = 'block';
         pauseIcon.style.display = 'none';
         musicCover.classList.remove('playing');
+        stopVisualization();
     }
 
 
@@ -1122,6 +1133,180 @@ document.addEventListener('DOMContentLoaded', function () {
             repeatBtn.classList.add('mode-all');
         } else if (playerState.repeatMode === 'one') {
             repeatBtn.classList.add('mode-one');
+        }
+    }
+
+
+    // 音频可视化函数
+
+    let visualizationActive = false;
+    let audioContext = null;
+    let analyser = null;
+    let animationId = null;
+    let audioSource = null;
+
+    function stopVisualization() {
+        visualizationActive = false;
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+
+        if (audioSource) {
+            try {
+                audioSource.disconnect();
+                audioSource = null;
+            } catch (e) {
+                console.error('断开音频源失败:', e);
+            }
+        }
+
+        if (analyser) {
+            try {
+                analyser.disconnect();
+                analyser = null;
+            } catch (e) {
+                console.error('断开分析器失败:', e);
+            }
+        }
+
+        if (audioContext && audioContext.state !== 'closed') {
+            try {
+                if (typeof audioContext.close === 'function') {
+                    audioContext.close();
+                }
+                audioContext = null;
+            } catch (e) {
+                console.error('关闭音频上下文失败:', e);
+            }
+        }
+    }
+
+    async function visualization() {
+        // 如果没有正在播放的歌曲，显示提示并返回
+        if (!playerState.playlist.length || playerState.currentTrackIndex < 0) {
+            showNotification('没有正在播放的歌曲');
+            return;
+        }
+
+        if (visualizationActive && audioSource && analyser) {
+            return;
+        }
+
+        const track = playerState.playlist[playerState.currentTrackIndex];
+        const currentTime = audioPlayer.currentTime;
+        const wasPlaying = !audioPlayer.paused;
+
+        stopVisualization();
+        visualizationActive = true;
+
+        if (!track.audio) {
+        } else if (!track.audio.startsWith('http://localhost:3001')) {
+            track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(track.audio)}`;
+            const wasPaused = audioPlayer.paused;
+            const savedTime = currentTime;
+            console.log(savedTime);
+
+            audioPlayer.crossOrigin = "anonymous";
+
+            const setTimeAndPlay = function () {
+                audioPlayer.currentTime = savedTime;
+
+                if (!wasPaused) {
+                    audioPlayer.play().catch(error => {
+                        console.error('尝试恢复播放失败:', error);
+                    });
+                }
+
+                audioPlayer.removeEventListener('canplay', setTimeAndPlay);
+            };
+
+            audioPlayer.addEventListener('canplay', setTimeAndPlay);
+
+            audioPlayer.src = track.audio;
+        }
+
+        try {
+            // 创建新的音频上下文
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // 创建分析器
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 1024;
+
+            // 创建音频源并连接
+            audioSource = audioContext.createMediaElementSource(audioPlayer);
+            audioSource.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            // 获取频率
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            // 获取并设置Canvas
+            const canvas = document.getElementById('visualizer');
+            if (!canvas) {
+                console.error('找不到可视化Canvas');
+                stopVisualization();
+                return;
+            }
+
+            const canvasCtx = canvas.getContext('2d');
+
+            // 设置Canvas尺寸
+            const container = canvas.parentElement;
+            if (container) {
+                canvas.width = container.clientWidth || 500;
+                canvas.height = container.clientHeight || 300;
+            } else {
+                canvas.width = 500;
+                canvas.height = 300;
+            }
+
+            // 绘制
+            function draw() {
+                if (!visualizationActive) return;
+
+                animationId = requestAnimationFrame(draw);
+
+                analyser.getByteFrequencyData(dataArray);
+
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const barWidth = (canvas.width / bufferLength) * 2.5;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = dataArray[i] * 1.5;
+
+                    const r = 220 - (dataArray[i] / 5); 
+                    const g = 180 + (dataArray[i] / 3); 
+                    const b = 250 - ((i / bufferLength) * 100); 
+
+                    canvasCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+                    x += barWidth + 1;
+                }
+            }
+            //开始画
+
+            draw();
+
+            // 如果wasPlaying为true但当前不是播放状态，则恢复播放
+            if (wasPlaying && !playerState.isPlaying) {
+                playAudio();
+            }
+
+
+        } catch (error) {
+            console.error('音频可视化初始化失败:', error);
+            showNotification('音频可视化初始化失败');
+
+            // 恢复播放状态
+            if (wasPlaying && !playerState.isPlaying) {
+                playAudio();
+            }
         }
     }
 
@@ -1351,6 +1536,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 3000);
     }
 
+    function showVisualizationModal() {
+        const modal = document.getElementById('visualizerModal');
+        modal.classList.add('show');
+        modalBackdrop.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        if (playerState.isPlaying && (!visualizationActive || !audioContext)) {
+            visualization();
+        }
+    }
+
     function attachEventListeners() {
         // 播放/暂停
         playPauseBtn.addEventListener('click', () => {
@@ -1375,6 +1570,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         favoriteBtn.addEventListener('click', toggleFavorite);
 
+        audioVisualizationBtn.addEventListener('click', showVisualizationModal);
+
         volumeBtn.addEventListener('click', toggleMute);
 
         volumeBar.addEventListener('click', handleVolumeChange);
@@ -1397,7 +1594,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         audioPlayer.addEventListener('timeupdate', handleTimeUpdate);
-        audioPlayer.addEventListener('ended', handleTrackEnd);
+        audioPlayer.addEventListener('ended', () => {
+            handleTrackEnd();
+            if (!playerState.isPlaying) {
+                stopVisualization();
+            }
+        });
 
         // 歌曲封面也能点击
         musicCover.addEventListener('click', () => {
@@ -1423,7 +1625,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 showNotification(`正在获取 ${track.title} 的音频...`);
                 const songUrlData = await getSongUrlBySongId(track.id);
                 if (songUrlData.data[0].url) {
-                    track.audio = songUrlData.data[0].url;
+                    const originalUrl = songUrlData.data[0].url;
+                    track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(originalUrl)}`;
                 }
                 else {
                     showNotification(`未找到 ${track.title} 的音频`);
@@ -2357,7 +2560,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
             showNotification(`正在加载 ${singerName} 的热门歌曲...`);
 
+            try {
+                if (checkingMusicAbortController) {
+                    checkingMusicAbortController.abort();
+                }
+                checkingMusicAbortController = new AbortController();
 
+                // 获取歌手热门歌曲
+                const songs = await getSingerHotSong(singerId);
+                if (!songs || songs.length === 0) {
+                    showNotification(`${singerName} 暂无热门歌曲`);
+                    return;
+                }
+
+                // 显示歌手详情页
+                await showArtistDetail(singerId, singerName, songs);
+            } catch (error) {
+                console.error('获取歌手热门歌曲失败:', error);
+                showNotification(`获取 ${singerName} 的热门歌曲失败，请稍后再试`);
+            }
         });
     }
 
