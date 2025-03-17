@@ -1231,11 +1231,31 @@ document.addEventListener('DOMContentLoaded', function () {
         visualizationActive = true;
 
         if (!track.audio) {
-            showNotification('当前歌曲音频资源不可用');
-            return;
-        } else if (!track.audio.startsWith('http://localhost:3001')) {
-            const originalUrl = track.audio;
-            track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(originalUrl)}`;
+            try {
+                showNotification(`正在获取 ${track.title} 的音频...`);
+                const songUrlData = await getSongUrlBySongId(track.id);
+                console.log(songUrlData.data[0].url);
+                
+                if (songUrlData.data[0].url) {
+                    const originalUrl = songUrlData.data[0].url;
+                    track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(originalUrl)}`;
+                    audioPlayer.crossOrigin = "anonymous";
+                }
+                else {
+                    showNotification(`未找到 ${track.title} 的音频`);
+                    throw new Error(`未找到 ${track.title} 的音频`);
+                }
+            } catch (err) {
+                console.error('获取音频失败:', err);
+                showNotification('获取音频失败，请稍后再试');
+                if (playerState.playlist.length > index + 1) {
+                    setTimeout(() => loadAndPlayTrack(index + 1), 3000);
+                }
+                return;
+            }
+        } else if (!track.audio.includes('/proxy-audio?url=')) {
+            track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(track.audio)}`;
+            audioPlayer.crossOrigin = "anonymous";
         }
         audioPlayer.crossOrigin = "anonymous"; 
 
@@ -1646,6 +1666,8 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 showNotification(`正在获取 ${track.title} 的音频...`);
                 const songUrlData = await getSongUrlBySongId(track.id);
+                console.log(songUrlData.data[0].url);
+                
                 if (songUrlData.data[0].url) {
                     const originalUrl = songUrlData.data[0].url;
                     track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(originalUrl)}`;
@@ -2208,10 +2230,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const playlists = response.data.data;
             renderUserPlaylists(playlists);
+            return playlists;
         } catch (error) {
             console.error('获取用户歌单失败:', error);
             const userPlaylistsContainer = document.querySelector('.user-playlists-container');
             userPlaylistsContainer.innerHTML = '<div class="error-message">加载歌单失败，请稍后再试</div>';
+            throw error; 
         }
     }
 
@@ -3527,23 +3551,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
     }
-
-    //添加歌曲到我的歌单
-
-    function addSongToPlaylist(songId, playlistId, token) {
-        infoAPI.post(`/api/playlists/${playlistId}/songs`, { songId: songId }, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }).then(response => {
-            console.log(response.data);
-            showNotification('已添加到我的歌单');
-        }).catch(error => {
-            console.error('添加到我的歌单失败:', error);
-            showNotification('添加到我的歌单失败，请稍后再试');
-        })
-    }
-
     // 接下来做歌词的展示
     function openLyricsPanel() {
         const lyricsModal = document.getElementById('lyricsModal');
