@@ -1053,7 +1053,6 @@ document.addEventListener('DOMContentLoaded', function () {
         playIcon.style.display = 'block';
         pauseIcon.style.display = 'none';
         musicCover.classList.remove('playing');
-        stopVisualization();
     }
 
 
@@ -1188,11 +1187,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    let isVasualization = false;
+
     async function visualization() {
         // 如果没有正在播放的歌曲，显示提示并返回
         if (!playerState.playlist.length || playerState.currentTrackIndex < 0) {
             showNotification('没有正在播放的歌曲');
             return;
+        }
+
+        if (audioContext && audioSource && analyser) {
+            return;
+        }
+
+        if(isVasualization){
+            stopVisualization();
         }
 
         if (visualizationActive && audioSource && analyser) {
@@ -1284,6 +1293,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     x += barWidth + 1;
                 }
+                isVasualization = true;
             }
             //开始画
 
