@@ -17,6 +17,22 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.style.overflow = '';
     });
 
+    // 侧边栏的展开收起
+    const asideBar= document.querySelector('.aside-bar');
+    const topLogo = document.querySelector('.top-logo');
+    const asideToggle = document.querySelector('.aside-toggle')
+    // 点击topLogo就收起侧边栏
+
+    topLogo.addEventListener('click', () => {
+        asideBar.classList.add('collapsed');
+    });
+
+    // 点击asideToggle展开侧边栏
+
+    asideToggle.addEventListener('click', () => {
+        asideBar.classList.remove('collapsed');
+    });
+
     const userName = document.getElementById('user-name');
     const infoAPI = axios.create({
         baseURL: 'http://47.99.53.155:5000',
@@ -460,7 +476,6 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
 
     // 添加主题切换按钮到顶部logo的右边
-    const topLogo = document.querySelector('.top-logo');
     topLogo.appendChild(themeToggle);
 
     // 检查用户之前的主题选择localStorage
