@@ -1219,7 +1219,8 @@ document.addEventListener('DOMContentLoaded', function () {
             showNotification('当前歌曲音频资源不可用');
             return;
         } else if (!track.audio.startsWith('http://localhost:3001')) {
-            track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(track.audio)}`;
+            const originalUrl = track.audio;
+            track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(originalUrl)}`;
         }
         audioPlayer.crossOrigin = "anonymous"; 
 
