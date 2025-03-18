@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const registerBtn = document.getElementById('registerBtn');
     const sendCodeBtn = document.getElementById('sendCodeBtn');
 
+
+
+
     document.querySelector('#visualizerModal .close-modal').addEventListener('click', () => {
         const modal = document.getElementById('visualizerModal');
         modal.classList.remove('show');
@@ -676,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 e.preventDefault();
                 performSearch(searchInput.value, type);
-                
+
             });
         }
 
@@ -821,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     hotSearchContainer.classList.remove('active');
 
                     console.log('829');
-                    
+
                     setTimeout(() => {
                         searchInput.value = '';
                     }, 1000)
@@ -831,6 +834,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+    if (document.querySelector('.hot-search-container').classList.contains('active')) {
+        document.querySelector('.hot-search-container').classList.remove('active');
+    }
 
 
 
@@ -858,7 +864,7 @@ document.addEventListener('DOMContentLoaded', function () {
             `
         }).join('');
         console.log(hots);
-        
+
         const hotSearchItems = document.querySelectorAll('.hot-search-item');
         hotSearchItems.forEach(item => {
             item.addEventListener('click', () => {
@@ -1985,8 +1991,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    const playlistHeader = document.querySelector('.playlist-header');
+    const clearPlaylistBtn = playlistHeader.querySelector('.clear-playlist-btn');
+
+    //清空播放列表
+
+    clearPlaylistBtn.addEventListener('click', () => {
+        playerState.playlist = [];
+        playerState.currentTrackIndex = -1;
+        audioPlayer.src = '';
+        playList.classList.remove('show');
+        updataPlaylistUI();
+    });
+
     // 根据分类获取而歌手名称
-   
+
 
     function getSingerByType(type) {
         return vercel.get(`/artist/list?type=${type}&limit=20`)
@@ -2692,7 +2711,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let innerHTML = res.map((item) => {
                 return `
                 <div class="playlist-items">
-                    <img src="${item.coverImgUrl}" alt="${item.name}">
+                    <img class="playlist-image" src="${item.coverImgUrl}" alt="${item.name}">
                     <div class="playlist-info">
                         <div class="playlist-name" data-id="${item.id}">${item.name}</div>
                         <div class="playlist-author">${item.creator.nickname}</div>
@@ -2701,9 +2720,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>`;
             }).join('');
             classifiedPlaylist.innerHTML = innerHTML;
+            document.querySelectorAll('.playlist-image').forEach(img => {
+                const extractColor = async () => {
+                    try {
+                        const palette = await Vibrant.from(img).getPalette();
+                        const color = palette.Vibrant?.hex || '#333';
+                        console.log('悬停颜色:', color);
+                        img.closest('.playlist-items').dataset.hoverColor = color;
+                    } catch (e) { /* 忽略错误 */ }
+                };
+
+                if (img.complete) extractColor();
+                else img.onload = extractColor;
+            });
+
         }).catch(error => {
             console.error('获取歌单数据失败:', error);
             classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
+        });
+
+        classifiedPlaylist.addEventListener('mouseover', (e) => {
+            const item = e.target.closest('.playlist-items');
+            if (item) item.style.backgroundColor = item.dataset.hoverColor || '#333';
+        });
+
+        classifiedPlaylist.addEventListener('mouseout', (e) => {
+            const item = e.target.closest('.playlist-items');
+            if (item) item.style.backgroundColor = 'transparent';
         });
 
 
@@ -2752,7 +2795,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         let innerHTML = res.map((item) => {
                             return `
                         <div class="playlist-items">
-                            <img src="${item.coverImgUrl}" alt="${item.name}">
+                            <img class="playlist-image" src="${item.coverImgUrl}" alt="${item.name}">
                             <div class="playlist-info">
                                 <div class="playlist-name" data-id="${item.id}">${item.name}</div>
                                 <div class="playlist-author">${item.creator.nickname}</div>
@@ -2761,6 +2804,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>`;
                         }).join('');
                         classifiedPlaylist.innerHTML = innerHTML;
+                        document.querySelectorAll('.playlist-image').forEach(img => {
+                            const extractColor = async () => {
+                                try {
+                                    const palette = await Vibrant.from(img).getPalette();
+                                    const color = palette.Vibrant?.hex || '#333';
+                                    console.log('悬停颜色:', color);
+                                    img.closest('.playlist-items').dataset.hoverColor = color;
+                                } catch (e) { /* 忽略错误 */ }
+                            };
+
+                            if (img.complete) extractColor();
+                            else img.onload = extractColor;
+                        });
                     }).catch(error => {
                         console.error('获取歌单数据失败:', error);
                         classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
@@ -3221,11 +3277,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return password.length >= 6 && /[a-zA-Z]/.test(password) && /\d/.test(password);
     }
 
-    // 精品分类歌单展示
 
     const playlistClassification = document.querySelector('.playlistClassification');
     const classifiedPlaylist = document.querySelector('.classified-playlist');
-    // 请求歌单图片，名称，id
     function getPlaylistByCat(cat) {
         return vercel.get(`/top/playlist/highquality?cat=${cat}&limit=20`)
             .then(response => response.data.playlists);
@@ -3235,27 +3289,76 @@ document.addEventListener('DOMContentLoaded', function () {
         return vercel.get(`/top/playlist/highquality?limit=20`)
             .then(response => response.data.playlists);
     }
-    // 默认获取全部歌单
-    (() => {
-        getPlaylistAll().then(res => {
-            let innerHTML = res.map((item) => {
-                return `
-                <div class="playlist-items">
-                    <img src="${item.coverImgUrl}" alt="${item.name}">
-                    <div class="playlist-info">
-                        <div class="playlist-name" data-id="${item.id}">${item.name}</div>
-                        
-                        <div class="playlist-author">${item.creator.nickname}</div>
-                        <div class="playlist-description">${item.description}</div>
-                    </div>
-                </div>`
-            }).join('');
-            classifiedPlaylist.innerHTML = innerHTML;
-        }).catch(error => {
-            console.error('获取歌单数据失败:', error);
-            classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
+
+    const PROXY_SERVER = 'http://localhost:3001';
+    const encodeUrl = url => `${PROXY_SERVER}/proxy-image?url=${encodeURIComponent(url)}`;
+
+    const extractDominantColor = async (imgElement) => {
+        try {
+            const palette = await Vibrant.from(imgElement).getPalette();
+            return palette.Vibrant?.hex || palette.Muted?.hex || '#333';
+        } catch (e) {
+            console.error('颜色提取失败:', e);
+            return '#333'; // 降级默认色
+        }
+    };
+
+    const renderPlaylists = (playlists) => {
+        const fragment = document.createDocumentFragment();
+
+        playlists.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'playlist-items';
+            div.innerHTML = `
+                <img class="playlist-image" 
+                    src="${encodeUrl(item.coverImgUrl)}" 
+                    alt="${item.name}" 
+                    crossorigin="anonymous">
+                <div class="playlist-info">
+                    <div class="playlist-name" data-id="${item.id}">${item.name}</div>
+                    <div class="playlist-author">${item.creator.nickname}</div>
+                    <div class="playlist-description">${item.description}</div>
+                </div>
+                `;
+            fragment.appendChild(div);
         });
-    })()
+
+        classifiedPlaylist.innerHTML = '';
+        classifiedPlaylist.appendChild(fragment);
+
+        Array.from(classifiedPlaylist.querySelectorAll('.playlist-image')).forEach(async (img) => {
+            const loadImage = () => new Promise((resolve) => {
+                if (img.complete) return resolve();
+                img.onload = resolve;
+            });
+
+            await loadImage();
+            const color = await extractDominantColor(img);
+            img.closest('.playlist-items').dataset.hoverColor = color;
+        });
+    };
+
+    (async () => {
+        try {
+            const playlists = await getPlaylistAll();
+            renderPlaylists(playlists);
+        } catch (error) {
+            console.error('获取歌单失败:', error);
+            classifiedPlaylist.innerHTML = '<div class="error-message">数据加载失败，请稍后重试</div>';
+        }
+    })();
+
+    classifiedPlaylist.addEventListener('mouseenter', (e) => {
+        const item = e.target.closest('.playlist-items');
+        if (item) {
+            item.style.backgroundColor = item.dataset.hoverColor || '#333';
+        }
+    }, true); 
+
+    classifiedPlaylist.addEventListener('mouseleave', (e) => {
+        const item = e.target.closest('.playlist-items');
+        if (item) item.style.backgroundColor = 'transparent';
+    }, true);
 
 
     playlistClassification.addEventListener('click', (e) => {
@@ -3265,7 +3368,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 let innerHTML = res.map((item) => {
                     return `
                     <div class="playlist-items">
-                        <img src="${item.coverImgUrl}" alt="${item.name}">
+                        <img class="playlist-image" src="${item.coverImgUrl}" alt="${item.name}">
                         <div class="playlist-info">
                             <div class="playlist-name" data-id="${item.id}">${item.name}</div>
                             <div class="playlist-author">${item.creator.nickname}</div>
@@ -3274,6 +3377,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>`
                 }).join('');
                 classifiedPlaylist.innerHTML = innerHTML;
+                document.querySelectorAll('.playlist-image').forEach(img => {
+                    const extractColor = async () => {
+                        try {
+                            const palette = await Vibrant.from(img).getPalette();
+                            const color = palette.Vibrant?.hex || '#333';
+                            console.log('悬停颜色:', color);
+                            img.closest('.playlist-items').dataset.hoverColor = color;
+                        } catch (e) { /* 忽略错误 */ }
+                    };
+
+                    if (img.complete) extractColor();
+                    else img.onload = extractColor;
+                });
             }).catch(error => {
                 console.error('获取歌单数据失败:', error);
                 classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
@@ -3921,5 +4037,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+
 
 });

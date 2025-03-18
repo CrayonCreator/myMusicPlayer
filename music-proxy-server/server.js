@@ -4,51 +4,49 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
-app.use(cors({
+const corsOptions = {
   origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Range', 'Accept', 'Authorization', 'Content-Length'],
-  exposedHeaders: ['Content-Length', 'Content-Range', 'Accept-Ranges']
-}));
+  methods: ['GET', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Range'],
+  exposedHeaders: ['Content-Length', 'Content-Range']
+};
 
-app.options('/proxy-audio', cors());
-
-app.get('/proxy-audio', async (req, res) => {
+const createProxyHandler = (responseType = 'stream') => async (req, res) => {
   try {
-    const audioUrl = req.query.url;
-    if (!audioUrl) {
-      return res.status(400).send('Missing URL parameter');
-    }
-    
-    console.log(`代理请求: ${audioUrl}`);
-    
+    const targetUrl = req.query.url;
+    if (!targetUrl) return res.status(400).send('Missing URL parameter');
+
+    console.log(`代理请求: ${targetUrl}`);
+
     const response = await axios({
       method: 'get',
-      url: audioUrl,
-      responseType: 'stream',
-      timeout: 30000  
+      url: targetUrl,
+      responseType: responseType,
+      timeout: 30000
     });
-    
-    const contentType = response.headers['content-type'];
-    const contentLength = response.headers['content-length'];
-    
-    if (contentType) res.setHeader('Content-Type', contentType);
-    if (contentLength) res.setHeader('Content-Length', contentLength);
-    
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range, Accept');
-    res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges');
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-    
-    response.data.pipe(res);
+
+    res.set({
+      'Content-Type': response.headers['content-type'],
+      'Content-Length': response.headers['content-length'],
+      'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin'
+    });
+
+    if (responseType === 'stream') {
+      response.data.pipe(res);
+    } else {
+      res.send(response.data);
+    }
   } catch (error) {
     console.error('代理请求失败:', error.message);
     res.status(500).send('代理请求失败');
   }
-});
+};
+
+app.get('/proxy-audio', cors(corsOptions), createProxyHandler('stream'));
+
+app.get('/proxy-image', cors(corsOptions), createProxyHandler('arraybuffer'));
 
 app.listen(port, () => {
-  console.log(`代理服务器运行在 http://localhost:${port}`);
+  console.log(`综合代理服务器运行在 http://localhost:${port}`);
 });
