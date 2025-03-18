@@ -4,7 +4,6 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
-// 使用更详细的CORS配置
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -12,7 +11,6 @@ app.use(cors({
   exposedHeaders: ['Content-Length', 'Content-Range', 'Accept-Ranges']
 }));
 
-// 确保OPTIONS请求能通过
 app.options('/proxy-audio', cors());
 
 app.get('/proxy-audio', async (req, res) => {
@@ -37,7 +35,6 @@ app.get('/proxy-audio', async (req, res) => {
     if (contentType) res.setHeader('Content-Type', contentType);
     if (contentLength) res.setHeader('Content-Length', contentLength);
     
-    // 明确设置CORS头
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range, Accept');

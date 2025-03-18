@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function () {
     // 登录/注册的元素获取
     const authModal = document.getElementById('authModal');
@@ -17,8 +18,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.style.overflow = '';
     });
 
+    const vercel = axios.create({
+        baseURL: 'http://47.99.53.155:3000',
+        timeout: 100000,
+    });
+
     // 侧边栏的展开收起
-    const asideBar= document.querySelector('.aside-bar');
+    const asideBar = document.querySelector('.aside-bar');
     const topLogo = document.querySelector('.top-logo');
     const asideToggle = document.querySelector('.aside-toggle')
     // 点击topLogo就收起侧边栏
@@ -645,6 +651,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 搜索框交互
     const searchInput = document.querySelector('.search input');
+    const hotSearchContainer = document.querySelector('.hot-search-container');
+    let hotSearchFilling = false;
+    const hotSearchList = document.querySelector('.hot-search-list');
 
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
@@ -667,9 +676,214 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 e.preventDefault();
                 performSearch(searchInput.value, type);
+                
+            });
+        }
+
+        searchInput.addEventListener('input', () => {
+            if (searchInput.value.trim() === '') {
+                hotSearchContainer.classList.add('active');
+                if (hotSearchContainer.querySelector('.hot-search-header').innerText !== '热门搜索') {
+                    hotSearchContainer.innerHTML = `
+                        <div class="hot-search-header">热门搜索</div>
+                        <div>
+                            <ul class="hot-search-list">
+                                <li class="hot-search-item">加载中...</li>
+                            </ul>
+                        </div>
+                    `;
+                    getHotSearch().then(data => {
+                        showHotSearch(data);
+                    });
+                }
+            }
+            else {
+                hotSearchContainer.classList.add('active');
+                getSearchSuggest(searchInput.value).then(data => {
+                    console.log('搜索建议:', data);
+                    showSearchSuggest(data);
+                });
+
+            }
+        })
+        // 事件绑定一下
+        // 使用缓存
+        let cachedHotSearchData = null;
+        searchInput.addEventListener('focus', () => {
+            if (searchInput.value.trim() === '') {
+                hotSearchContainer.classList.add("active");
+                if (!cachedHotSearchData) {
+                    getHotSearch().then(data => {
+                        console.log(data);
+                        cachedHotSearchData = data;
+                        showHotSearch(data);
+                    });
+                } else {
+                    showHotSearch(cachedHotSearchData);
+                }
+            } else {
+                hotSearchContainer.classList.add('active');
+                getSearchSuggest(searchInput.value).then(data => {
+                    showSearchSuggest(data);
+                });
+            }
+        });
+
+        if (searchInput.value.trim() === '') {
+            hotSearchContainer.classList.add("active");
+            if (!cachedHotSearchData) {
+                getHotSearch().then(data => {
+                    console.log(data);
+                    cachedHotSearchData = data;
+                    showHotSearch(data);
+                });
+            } else {
+                showHotSearch(cachedHotSearchData);
+            }
+        }
+
+    }
+
+    function getSearchSuggest(keywords) {
+        return vercel.get(`/search/suggest?keywords=${keywords}`)
+            .then(res => res.data.result)
+            .catch(error => {
+                console.error('获取搜索建议失败:', error);
+                return null;
+            });
+    }
+
+    function showSearchSuggest(dataArray) {
+        if (!dataArray) {
+            hotSearchContainer.innerHTML = '搜索建议加载失败';
+            return;
+        }
+        else {
+            let innerHTML = '';
+            if (dataArray.songs) {
+                innerHTML += dataArray.songs.map((songitem) => {
+                    return `
+                    <li class="hot-search-item" data-type='songs' data-name="${songitem.name}">${songitem.name}</li>
+                    `
+                }).join('');
+                console.log('songs');
+            }
+            if (dataArray.playlists) {
+                innerHTML += dataArray.playlists.map((playlist) => {
+                    return `
+                    <li class="hot-search-item" data-type='playlists' data-name="${playlist.name}">${playlist.name}</li>
+                    `
+                }).join('');
+                console.log('playlists');
+            }
+            if (dataArray.artists) {
+                innerHTML += dataArray.artists.map((artist) => {
+                    return `
+                    <li class="hot-search-item" data-type='artists' data-name="${artist.name}">${artist.name}</li>
+                    `
+                }).join('');
+                console.log('artists');
+
+            }
+            if (dataArray.albums) {
+                innerHTML += dataArray.albums.map((album) => {
+                    return `
+                    <li class="hot-search-item" data-type='albums' data-name="${album.name}">${album.name}</li>
+                    `
+                }).join('');
+                console.log('albums');
+            }
+            console.log(innerHTML);
+            hotSearchList.innerHTML = innerHTML;
+            const hotSearchItems = document.querySelectorAll('.hot-search-item');
+            hotSearchItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    searchInput.value = item.getAttribute('data-name');
+                    const searchButton = document.querySelector('.search button');
+                    const selectedOption = document.querySelector('#search-type option:checked');
+                    if (item.getAttribute('data-type') === 'songs') {
+                        selectedOption.value = '单曲';
+                        selectedOption.setAttribute('data-type', 1);
+                    }
+                    else if (item.getAttribute('data-type') === 'playlists') {
+                        selectedOption.value = '歌单';
+                        selectedOption.setAttribute('data-type', 1000);
+                    }
+                    else if (item.getAttribute('data-type') === 'artists') {
+                        selectedOption.value = '单曲';
+                        selectedOption.setAttribute('data-type', 1);
+                    }
+                    else if (item.getAttribute('data-type') === 'albums') {
+                        selectedOption.value = '单曲';
+                        selectedOption.setAttribute('data-type', 1);
+                    }
+                    searchButton.click();
+                    hotSearchContainer.classList.remove('active');
+
+                    console.log('829');
+                    
+                    setTimeout(() => {
+                        searchInput.value = '';
+                    }, 1000)
+                })
             });
         }
     }
+
+
+
+
+
+    // 热门搜索获取
+
+    function getHotSearch() {
+        return vercel.get('/search/hot').then(res => {
+            console.log('热门搜索:', res.data.result.hots);
+            return res.data.result.hots;
+        }).catch(error => {
+            console.error('获取热门搜索失败:', error);
+        });
+    }
+
+    // 显示热门搜索
+    // 这里的hots是一个数组
+
+    function showHotSearch(hots) {
+        console.log('进行了热门搜索的展示');
+
+        if (hotSearchFilling) return;
+        hotSearchList.innerHTML = hots.map((hot) => {
+            return `
+                <li class="hot-search-item" data-name="${hot.first}">${hot.first}</li>
+            `
+        }).join('');
+        console.log(hots);
+        
+        const hotSearchItems = document.querySelectorAll('.hot-search-item');
+        hotSearchItems.forEach(item => {
+            item.addEventListener('click', () => {
+                searchInput.value = item.getAttribute('data-name');
+                const searchButton = document.querySelector('.search button');
+                searchButton.click();
+                setTimeout(() => {
+                    searchInput.value = '';
+                }, 1000)
+
+            })
+        });
+        hotSearchFilling = true;
+    }
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !hotSearchContainer.contains(e.target)) {
+            hotSearchContainer.classList.remove('active');
+        }
+    });
+    hotSearchContainer.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    searchInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 
     // 搜索
     function performSearch(query, type) {
@@ -714,6 +928,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // 显示搜索结果
 
     async function showSearchResults(results, type) {
+
+
+        document.querySelector('#searchResultModal').classList.add('show');
+        modalBackdrop.classList.add('show');
+
+        document.querySelector('.search-result').innerHTML = '正在加载中...';
+
         if (type == 1) {
             let innerHTML = '';
             for (const song of results) {
@@ -857,8 +1078,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        document.querySelector('#searchResultModal').classList.add('show');
-        modalBackdrop.classList.add('show');
 
 
 
@@ -1205,6 +1424,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let isVasualization = false;
 
     async function visualization() {
+
         // 如果没有正在播放的歌曲，显示提示并返回
         if (!playerState.playlist.length || playerState.currentTrackIndex < 0) {
             showNotification('没有正在播放的歌曲');
@@ -1215,7 +1435,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if(isVasualization){
+        if (isVasualization) {
             stopVisualization();
         }
 
@@ -1235,7 +1455,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showNotification(`正在获取 ${track.title} 的音频...`);
                 const songUrlData = await getSongUrlBySongId(track.id);
                 console.log(songUrlData.data[0].url);
-                
+
                 if (songUrlData.data[0].url) {
                     const originalUrl = songUrlData.data[0].url;
                     track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(originalUrl)}`;
@@ -1257,12 +1477,12 @@ document.addEventListener('DOMContentLoaded', function () {
             track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(track.audio)}`;
             audioPlayer.crossOrigin = "anonymous";
         }
-        audioPlayer.crossOrigin = "anonymous"; 
+        audioPlayer.crossOrigin = "anonymous";
 
 
         if (audioPlayer.src !== track.audio) {
             audioPlayer.src = track.audio;
-            
+
             if (wasPlaying) {
                 await audioPlayer.play().catch(err => console.error('重新播放失败:', err));
             }
@@ -1667,7 +1887,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showNotification(`正在获取 ${track.title} 的音频...`);
                 const songUrlData = await getSongUrlBySongId(track.id);
                 console.log(songUrlData.data[0].url);
-                
+
                 if (songUrlData.data[0].url) {
                     const originalUrl = songUrlData.data[0].url;
                     track.audio = `http://localhost:3001/proxy-audio?url=${encodeURIComponent(originalUrl)}`;
@@ -1766,10 +1986,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // 根据分类获取而歌手名称
-    const vercel = axios.create({
-        baseURL: 'http://47.99.53.155:3000',
-        timeout: 100000,
-    });
+   
 
     function getSingerByType(type) {
         return vercel.get(`/artist/list?type=${type}&limit=20`)
@@ -2235,7 +2452,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('获取用户歌单失败:', error);
             const userPlaylistsContainer = document.querySelector('.user-playlists-container');
             userPlaylistsContainer.innerHTML = '<div class="error-message">加载歌单失败，请稍后再试</div>';
-            throw error; 
+            throw error;
         }
     }
 
