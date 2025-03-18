@@ -409,151 +409,152 @@
                     </div>
 
                 </div>
-                <!-- 歌单详情模态框 -->
-                <div class="modal" id="playlistModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>歌单详情</h3>
-                            <button class="close-modal">
-                                <svg viewBox="0 0 24 24" width="24" height="24">
-                                    <path
-                                        d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
-                                        fill="currentColor"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="song-list">
-                                <div class="song-item" data-musicId="111">
-                                    <div class="song-info">
-                                        <img src="./img/crayon.jpg" alt="Cover">
-                                        <div>
-                                            <div class="song-title">歌曲名称</div>
-                                            <div class="song-artist">歌手名称</div>
-                                        </div>
-                                    </div>
+               
+            </div>
+        </div>
+         <!-- 歌单详情模态框 -->
+         <div class="modal" id="playlistModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>歌单详情</h3>
+                    <button class="close-modal">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path
+                                d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
+                                fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="song-list">
+                        <div class="song-item" data-musicId="111">
+                            <div class="song-info">
+                                <img src="./img/crayon.jpg" alt="Cover">
+                                <div>
+                                    <div class="song-title">歌曲名称</div>
+                                    <div class="song-artist">歌手名称</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- 创建新歌单模态框 -->
-                <div class="modal" id="createPlaylistModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>创建新歌单</h3>
-                            <button class="close-modal">
-                                <svg viewBox="0 0 24 24" width="24" height="24">
-                                    <path
-                                        d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
-                                        fill="currentColor">
-                                    </path>
-                                </svg>
-                            </button>
+            </div>
+        </div>
+        <!-- 创建新歌单模态框 -->
+        <div class="modal" id="createPlaylistModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>创建新歌单</h3>
+                    <button class="close-modal">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path
+                                d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
+                                fill="currentColor">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="createPlaylistForm">
+                        <div class="input-group">
+                            <label for="playlistName">歌单名称</label>
+                            <input type="text" id="playlistName" placeholder="请输入歌单名称">
                         </div>
-                        <div class="modal-body">
-                            <div class="createPlaylistForm">
-                                <div class="input-group">
-                                    <label for="playlistName">歌单名称</label>
-                                    <input type="text" id="playlistName" placeholder="请输入歌单名称">
-                                </div>
-                                <div class="input-group">
-                                    <label for="playlistDescription">歌单描述</label>
-                                    <textarea id="playlistDescription" placeholder="请输入歌单描述"></textarea>
-                                </div>
-                                <div class="input-group">
-                                    <button type="submit" id="createPlaylistBtn">创建歌单</button>
-                                </div>
-                            </div>
+                        <div class="input-group">
+                            <label for="playlistDescription">歌单描述</label>
+                            <textarea id="playlistDescription" placeholder="请输入歌单描述"></textarea>
+                        </div>
+                        <div class="input-group">
+                            <button type="submit" id="createPlaylistBtn">创建歌单</button>
                         </div>
                     </div>
                 </div>
-                <!-- 搜索结果模态框 -->
-                <div class="modal" id="searchResultModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>搜索结果</h3>
-                            <button class="close-modal">
-                                <svg viewBox="0 0 24 24" width="24" height="24">
-                                    <path
-                                        d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
-                                        fill="currentColor"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="search-result">
-                                <!-- 歌曲模板 -->
-
-                                <div class="search-result-item" data-id="111">
-                                    <div class="search-result-info">
-                                        <div class="search-result-title">歌曲名称</div>
-                                        <div class="search-result-artist">歌手名称</div>
-                                    </div>
-                                </div>
-                                <!-- 歌单模板 -->
-
-                                <div class="search-result-item" data-id="111">
-                                    <div class="srearch-result-info">
-                                        <div class="search-result-img">
-                                            <img src="./img/crayon.jpg" alt="歌单封面">
-                                        </div>
-                                        <div class="search-result-title">歌单名称</div>
-                                    </div>
-                                    <div class="search-result-author-info">
-                                        <div class="search-result-author-img">
-                                            <img class="author-img" src="./img/crayon.jpg" alt="歌单作者头像">
-                                            <span>歌单作者</span>
-                                        </div>
-
-                                    </div>
-                                </div>
-                                <!-- MV模板 -->
-
-                                <div class="search-result-item" data-id="111">
-                                    <div class="search-result-info">
-                                        <div class="search-result-img">
-                                            <img src="./img/crayon.jpg" alt="MV封面">
-                                        </div>
-                                        <div class="search-result-title">MV名称</div>
-                                        <div class="search-result-artist">MV描述</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
+            </div>
+        </div>
+        <!-- 搜索结果模态框 -->
+        <div class="modal" id="searchResultModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>搜索结果</h3>
+                    <button class="close-modal">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path
+                                d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
+                                fill="currentColor"></path>
+                        </svg>
+                    </button>
                 </div>
+                <div class="modal-body">
+                    <div class="search-result">
+                        <!-- 歌曲模板 -->
 
-                <!-- 播放mv模态框 -->
-
-                <div class="modal" id="mvDetailModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>播放MV</h3>
-                            <button class="close-modal">
-                                <svg viewBox="0 0 24 24" width="24" height="24">
-                                    <path
-                                        d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
-                                        fill="currentColor"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mv-video">
-                                <video id="mv-player" src="" controls></video>
+                        <div class="search-result-item" data-id="111">
+                            <div class="search-result-info">
+                                <div class="search-result-title">歌曲名称</div>
+                                <div class="search-result-artist">歌手名称</div>
                             </div>
-                            <div class="mv-info-container">
-                                <div class="mv-cover">
+                        </div>
+                        <!-- 歌单模板 -->
+
+                        <div class="search-result-item" data-id="111">
+                            <div class="srearch-result-info">
+                                <div class="search-result-img">
+                                    <img src="./img/crayon.jpg" alt="歌单封面">
+                                </div>
+                                <div class="search-result-title">歌单名称</div>
+                            </div>
+                            <div class="search-result-author-info">
+                                <div class="search-result-author-img">
+                                    <img class="author-img" src="./img/crayon.jpg" alt="歌单作者头像">
+                                    <span>歌单作者</span>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- MV模板 -->
+
+                        <div class="search-result-item" data-id="111">
+                            <div class="search-result-info">
+                                <div class="search-result-img">
                                     <img src="./img/crayon.jpg" alt="MV封面">
                                 </div>
-                                <div class="mv-text-info">
-                                    <div class="mv-title">MV标题</div>
-                                    <div class="mv-artist">
-                                        <span>演唱者名称</span>
-                                    </div>
-                                </div>
+                                <div class="search-result-title">MV名称</div>
+                                <div class="search-result-artist">MV描述</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- 播放mv模态框 -->
+
+        <div class="modal" id="mvDetailModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>播放MV</h3>
+                    <button class="close-modal">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path
+                                d="M19.39 5.73l-1.12-1.12L12 10.88 5.73 4.61 4.61 5.73 10.88 12l-6.17 6.17 1.12 1.12L12 13.12l6.27 6.27 1.12-1.12L13.12 12z"
+                                fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mv-video">
+                        <video id="mv-player" src="" controls></video>
+                    </div>
+                    <div class="mv-info-container">
+                        <div class="mv-cover">
+                            <img src="./img/crayon.jpg" alt="MV封面">
+                        </div>
+                        <div class="mv-text-info">
+                            <div class="mv-title">MV标题</div>
+                            <div class="mv-artist">
+                                <span>演唱者名称</span>
                             </div>
                         </div>
                     </div>
