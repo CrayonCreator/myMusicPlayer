@@ -1330,6 +1330,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         loadAndPlayTrack(playerState.currentTrackIndex);
         playAudio();
+        loadLyrics();
+
     }
 
     // 播放上一首
@@ -1344,6 +1346,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         loadAndPlayTrack(playerState.currentTrackIndex);
         playAudio();
+        //更新歌词显示
+        loadLyrics();
+
+
     }
 
     // 获取随机歌曲索引
