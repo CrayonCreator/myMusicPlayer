@@ -3115,7 +3115,7 @@ body {
         top: 0;
         left: 0;
         z-index: 800;
-        width: 150px;
+        width: 240px;
     }
 
     .theme-toggle {
@@ -3195,7 +3195,16 @@ body {
 
     .top-logo {
         cursor: pointer;
+        position: relative;
+        height: 80px;
     }
+    .top-logo span{
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
 
     .cover-container {
         width: 40px;
@@ -3364,6 +3373,11 @@ body {
 
     .col-actions{
         width: 20px;
+    }
+
+    .item .delete-playlist{
+        padding: 0;
+        right: 0;
     }
 
 
