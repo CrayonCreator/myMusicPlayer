@@ -3352,5 +3352,16 @@ body {
         margin-top: 5px;
     }
 
+    .hot-search-container {
+        width: 300px;
+        max-height: 240px;
+    }
+
+    .hot-search-item{
+        white-space: nowrap;
+        height: 40px;
+    }
+
+
 
 }
