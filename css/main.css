@@ -3362,6 +3362,9 @@ body {
         height: 40px;
     }
 
+    .col-actions{
+        width: 20px;
+    }
 
 
 }
