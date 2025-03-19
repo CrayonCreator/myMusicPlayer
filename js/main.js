@@ -3894,7 +3894,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         lyricsModal.classList.add('show');
-        modalBackdrop.classList.add('show');
         document.body.style.overflow = 'hidden';
 
         loadLyrics();
