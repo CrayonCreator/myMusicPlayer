@@ -655,7 +655,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // 搜索框交互
     const searchInput = document.querySelector('.search input');
     const hotSearchContainer = document.querySelector('.hot-search-container');
-    let hotSearchFilling = false;
     const hotSearchList = document.querySelector('.hot-search-list');
 
     if (searchInput) {
@@ -857,7 +856,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function showHotSearch(hots) {
         console.log('进行了热门搜索的展示');
 
-        if (hotSearchFilling) return;
         hotSearchList.innerHTML = hots.map((hot) => {
             return `
                 <li class="hot-search-item" data-name="${hot.first}">${hot.first}</li>
@@ -877,7 +875,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             })
         });
-        hotSearchFilling = true;
     }
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !hotSearchContainer.contains(e.target)) {
@@ -2014,12 +2011,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function getSingerByType(type) {
-        return vercel.get(`/artist/list?type=${type}&limit=20`)
-            .then(response => response.data.artists);
+        return vercel.get(`/artist/list?type=${type}&limit=28`)
+            .then(response => {
+                response.data.artists.forEach(artist => {
+                    if (artist.picUrl) {
+                        artist.picUrl = `${artist.picUrl}?param=100y100`;
+                    }
+                    if (artist.img1v1Url) {
+                        artist.img1v1Url = `${artist.img1v1Url}?param=100y100`;
+                    }
+                });
+                return response.data.artists;
+            });
     }
     function getSingerByArea(area) {
-        return vercel.get(`/artist/list?area=${area}&limit=20`)
-            .then(response => response.data.artists);
+        return vercel.get(`/artist/list?area=${area}&limit=28`)
+            .then(response => {
+                response.data.artists.forEach(artist => {
+                    if (artist.picUrl) {
+                        artist.picUrl = `${artist.picUrl}?param=100y100`;
+                    }
+                    if (artist.img1v1Url) {
+                        artist.img1v1Url = `${artist.img1v1Url}?param=100y100`;
+                    }
+                });
+                return response.data.artists;
+            });
     }
 
     //默认获取全部歌手
@@ -2680,13 +2697,25 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <div class="playlistClassification">
             <ul>
-                <li data-cat="全部" class="all">全部</li>
-                <li data-cat="华语">华语</li>
-                <li data-cat="古风">古风</li>
-                <li data-cat="流行">流行</li>
-                <li data-cat="摇滚">摇滚</li>
-                <li data-cat="民谣">民谣</li>
-                <li data-cat="电子">电子</li>
+                <li data-cat="1009">蓝调</li>
+                <li data-cat="2025">浪漫</li>
+                <li data-cat="5001">华语</li>
+                <li data-cat="1045">欧美</li>
+                <li data-cat="5003">韩语</li>
+                <li data-cat="5002">日语</li>
+                <li data-cat="12001">古风</li>
+                <li data-cat="1001">民谣</li>
+                <li data-cat="1041">经典</li>
+                <li data-cat="7003">世界音乐</li>
+                <li data-cat="2008">轻音乐</li>
+                <li data-cat="1">流行</li>
+                <li data-cat="2040">粤语</li>
+                <li data-cat="5005">R&B</li>
+                <li data-cat="1031">怀旧</li>
+                <li data-cat="2017">学习</li>
+                <li data-cat="1015">夜晚</li>
+                <li data-cat="4001">运动</li>
+                <li data-cat="5004">说唱</li> 
             </ul>
         </div>
         <div class="classified-playlist">
@@ -2712,38 +2741,17 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // 加载歌单数据
-        getPlaylistAll().then(res => {
-            let innerHTML = res.map((item) => {
-                return `
-                <div class="playlist-items">
-                    <img class="playlist-image" src="${item.coverImgUrl}" alt="${item.name}">
-                    <div class="playlist-info">
-                        <div class="playlist-name" data-id="${item.id}">${item.name}</div>
-                        <div class="playlist-author">${item.creator.nickname}</div>
-                        <div class="playlist-description">${item.description || ''}</div>
-                    </div>
-                </div>`;
-            }).join('');
-            classifiedPlaylist.innerHTML = innerHTML;
-            document.querySelectorAll('.playlist-image').forEach(img => {
-                const extractColor = async () => {
-                    try {
-                        const palette = await Vibrant.from(img).getPalette();
-                        const color = palette.Vibrant?.hex || '#333';
-                        console.log('悬停颜色:', color);
-                        img.closest('.playlist-items').dataset.hoverColor = color;
-                    } catch (e) { /* 忽略错误 */ }
-                };
+        (async () => {
+            try {
+                const playlists = await getPlaylistAll();
+                renderPlaylists(playlists, classifiedPlaylist);
+            } catch (error) {
+                console.error('获取歌单失败:', error);
+                classifiedPlaylist.innerHTML = '<div class="error-message">数据加载失败，请稍后重试</div>';
+            }
+        })();
 
-                if (img.complete) extractColor();
-                else img.onload = extractColor;
-            });
 
-        }).catch(error => {
-            console.error('获取歌单数据失败:', error);
-            classifiedPlaylist.innerHTML = '<div class="error-message">获取歌单数据失败，请稍后再试</div>';
-        });
 
         classifiedPlaylist.addEventListener('mouseover', (e) => {
             const item = e.target.closest('.playlist-items');
@@ -3292,7 +3300,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function getPlaylistAll() {
-        return vercel.get(`/top/playlist/highquality?limit=20`)
+        return vercel.get(`/top/playlist/highquality?limit=50`)
             .then(response => response.data.playlists);
     }
 
@@ -3309,7 +3317,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    const renderPlaylists = (playlists) => {
+    const renderPlaylists = (playlists, playlistContainer) => {
         const fragment = document.createDocumentFragment();
 
         playlists.forEach(item => {
@@ -3329,10 +3337,10 @@ document.addEventListener('DOMContentLoaded', function () {
             fragment.appendChild(div);
         });
 
-        classifiedPlaylist.innerHTML = '';
-        classifiedPlaylist.appendChild(fragment);
+        playlistContainer.innerHTML = '';
+        playlistContainer.appendChild(fragment);
 
-        Array.from(classifiedPlaylist.querySelectorAll('.playlist-image')).forEach(async (img) => {
+        Array.from(playlistContainer.querySelectorAll('.playlist-image')).forEach(async (img) => {
             const loadImage = () => new Promise((resolve) => {
                 if (img.complete) return resolve();
                 img.onload = resolve;
@@ -3347,7 +3355,7 @@ document.addEventListener('DOMContentLoaded', function () {
     (async () => {
         try {
             const playlists = await getPlaylistAll();
-            renderPlaylists(playlists);
+            renderPlaylists(playlists, classifiedPlaylist);
         } catch (error) {
             console.error('获取歌单失败:', error);
             classifiedPlaylist.innerHTML = '<div class="error-message">数据加载失败，请稍后重试</div>';
@@ -3359,7 +3367,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (item) {
             item.style.backgroundColor = item.dataset.hoverColor || '#333';
         }
-    }, true); 
+    }, true);
 
     classifiedPlaylist.addEventListener('mouseleave', (e) => {
         const item = e.target.closest('.playlist-items');

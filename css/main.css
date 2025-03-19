@@ -97,6 +97,10 @@
     box-sizing: border-box;
 }
 
+*::-webkit-scrollbar {
+    display: none;
+}
+
 
 ul {
     list-style: none;
@@ -189,8 +193,12 @@ body {
     max-height: 0;
     overflow: auto;
     transition: max-height 0.5s ease;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-primary) transparent;
+    /* scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent; */
+}
+
+.aside-bar .section-content::-webkit-scrollbar {
+    display: none;
 }
 
 .aside-bar .section-content.show {
@@ -1325,8 +1333,11 @@ body {
 .play-list-content {
     flex: 1;
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-primary) transparent;
+
+}
+
+.play-list-content::-webkit-scrollbar {
+    display: none;
 }
 
 
@@ -1404,11 +1415,15 @@ body {
     flex: 1;
     overflow-y: auto;
     position: relative;
-    scrollbar-width: thin;
+    /* scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent; */
     padding-bottom: 80px;
-    scrollbar-color: var(--accent-primary) transparent;
     display: flex;
     flex-direction: column;
+}
+
+.mainContentArea::-webkit-scrollbar {
+    display: none;
 }
 
 /* classify */
@@ -2033,6 +2048,7 @@ body {
     flex: 0 0 calc((100% - 90px) / 7);
     max-width: calc((100% - 90px) / 7);
 }
+
 .playlistClassification ul li:hover {
     background-color: var(--accent-primary);
     color: white;
@@ -2621,9 +2637,11 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-primary) transparent;
     text-align: center;
+}
+
+.lyrics-container::-webkit-scrollbar {
+    display: none;
 }
 
 .lyrics-line {
@@ -2713,8 +2731,12 @@ body {
     width: 100%;
     height: 100%;
     overflow-y: scroll;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-primary) transparent;
+    /* scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent; */
+}
+
+#lyricsModalContent::-webkit-scrollbar {
+    display: none;
 }
 
 
@@ -2789,9 +2811,11 @@ body {
     border-bottom: 3px solid var(--border-color);
 }
 
-.modal-body {
-    scrollbar-width: thin;
+.modal-body ::-webkit-scrollbar {
+    display: none;
 }
+
+
 
 .search-result .search-result-item {
     display: flex;
@@ -2932,8 +2956,12 @@ body {
     background-color: var(--bg-primary);
     border-top: 1px solid var(--border-color);
     overflow-y: scroll;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-primary) transparent;
+    /* scrollbar-width: thin;
+    scrollbar-color: var(--accent-primary) transparent; */
+}
+
+.mv-info-container::-webkit-scrollbar {
+    display: none;
 }
 
 .mv-cover {

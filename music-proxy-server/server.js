@@ -48,5 +48,5 @@ app.get('/proxy-audio', cors(corsOptions), createProxyHandler('stream'));
 app.get('/proxy-image', cors(corsOptions), createProxyHandler('arraybuffer'));
 
 app.listen(port, () => {
-  console.log(`综合代理服务器运行在 http://localhost:${port}`);
+  console.log(`代理服务器运行在 http://localhost:${port}`);
 });
