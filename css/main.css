@@ -2063,9 +2063,72 @@ body {
     border-color: var(--accent-hover);
 }
 
+/* 曲风分类歌单 */
+
+
+.genreClassification {
+    display: flex;
+    padding: 15px 20px;
+    background-color: var(--bg-primary);
+    height: auto;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+.genreClassification ul {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 15px;
+    justify-content: flex-start;
+    padding: 5px 0;
+}
+
+.genreClassification ul::after {
+    content: "";
+    flex: auto;
+}
+
+.genreClassification ul li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px var(--shadow-color);
+    min-width: 80px;
+    text-align: center;
+    flex: 0 0 calc((100% - 90px) / 7);
+    max-width: calc((100% - 90px) / 7);
+}
+
+.genreClassification ul li:hover {
+    background-color: var(--accent-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+
+.genreClassification ul li.active {
+    background-color: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-hover);
+}
+
+
 /* 精品歌单展示样式 */
 
-.classified-playlist {
+.classified-playlist,
+.genre {
     width: 100%;
     display: grid;
     place-items: center;
@@ -2075,7 +2138,8 @@ body {
     border-bottom: 3px solid var(--border-color);
 }
 
-.playlist-items {
+.playlist-items,
+.genre-items {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -2092,16 +2156,26 @@ body {
     overflow: hidden;
 }
 
-.playlist-items:hover {
+.genre-items {
+    height: 220px;
+}
+
+.playlist-items:hover{
     color: var(--bg-primary);
 }
 
-.playlist-items:hover {
+.genre-items:hover{
+    background-color: var(--bg-secondary);
+} 
+
+.playlist-items:hover,
+.genre-items:hover {
     transform: translateY(-5px);
 }
 
 
-.playlist-items img {
+.playlist-items img ,
+.genre-items img {
     width: 150px;
     height: 150px;
     border-radius: 5px;
@@ -2123,7 +2197,8 @@ body {
 }
 
 
-.playlist-items .playlist-info {
+.playlist-items .playlist-info,
+.genre-items .genre-info {
     display: flex;
     flex-direction: column;
     gap: 0px;
@@ -2133,7 +2208,8 @@ body {
     justify-content: center;
 }
 
-.playlist-items .playlist-info .playlist-name {
+.playlist-items .playlist-info .playlist-name ,
+.genre-items .genre-info .genre-name {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -2141,7 +2217,7 @@ body {
     text-align: center;
 }
 
-.playlist-description {
+.playlist-description{
     font-size: 12px;
     color: var(--text-secondary);
     display: -webkit-box;
@@ -2152,7 +2228,7 @@ body {
     width: 100px;
 }
 
-.playlist-items:hover .playlist-description {
+.playlist-items:hover .playlist-description{
     color: white;
 }
 

@@ -2665,7 +2665,90 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    //缓存
+    // 曲风分类歌单
+
+    function getPlaylistByTagId(tagId) {
+        return vercel.get(`/style/playlist?tagId=${tagId}`)
+            .then(response => response.data.data.playlist);
+    }
+
+    // 默认显示嘻哈说唱歌单
+
+    function loadGenrePlaylist(tagId) {
+        const genre = document.querySelector('.genre');
+
+        if (!genre) return;
+
+        // 显示加载中状态
+        genre.innerHTML = '<div class="loading-indicator">加载中...</div>';
+
+        getPlaylistByTagId(tagId)
+            .then(playlists => {
+                if (!playlists || playlists.length === 0) {
+                    genre.innerHTML = '<div class="error-message">暂无曲风歌单</div>';
+                    return;
+                }
+
+                const innerHTML = playlists.map((playlist) => {
+                    // 为图片添加错误处理
+                    const coverUrl = playlist.cover || './img/crayon.jpg';
+
+                    return `
+                    <div class="genre-items">
+                        <img src="${coverUrl}" alt="${playlist.name}" onerror="this.src='./img/crayon.jpg'">
+                        <div class="genre-info">
+                            <div class="genre-name" data-id="${playlist.id}">${playlist.name}</div>
+                            <div class="genre-author">${playlist.userName || '未知艺术家'}</div>
+                        </div>
+                    </div>
+                    `
+                }).join('');
+
+                genre.innerHTML = innerHTML;
+
+                // 添加点击事件处理
+                addGenreItemClickEvents();
+            })
+            .catch(error => {
+                console.error('获取曲风歌单失败:', error);
+                genre.innerHTML = '<div class="error-message">获取曲风歌单失败，请稍后再试</div>';
+            });
+    }
+
+    function addGenreItemClickEvents() {
+        document.querySelectorAll('.genre-items').forEach(item => {
+            item.addEventListener('click', () => {
+                const playlistId = item.querySelector('.genre-name').getAttribute('data-id');
+                const playlistName = item.querySelector('.genre-name').textContent;
+
+                if (playlistId) {
+                    showNotification(`正在加载歌单: ${playlistName}`);
+                    getPlaylistSongs(playlistId)
+                        .then(songs => {
+                            showPlaylistDetail(playlistId, playlistName, songs);
+                        })
+                        .catch(error => {
+                            console.error('获取歌单详情失败:', error);
+                            showNotification('获取歌单详情失败，请稍后再试');
+                        });
+                }
+            });
+        });
+    }
+
+    (() => {
+        loadGenrePlaylist(1017);
+    })();
+
+    document.querySelectorAll('.genreClassification li').forEach(li => {
+        li.addEventListener('click', () => {
+            const tagId = li.getAttribute('data-TagId');
+            if (tagId) {
+                loadGenrePlaylist(tagId);
+            }
+        });
+    });
+
     let cachedSingers = null;
 
     function showSingersList() {
@@ -2721,6 +2804,43 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="classified-playlist">
             <div class="loading-indicator">加载中...</div>
         </div>
+        <div class="genreClassification">
+            <ul>
+                <li data-TagId="1017">嘻哈说唱</li>
+                <li data-TagId="1015">电子</li>
+                <li data-TagId="1046">科技舞曲</li>
+                <li data-TagId="1059">迷幻舞曲</li>
+                <li data-TagId="1108">氛围音乐</li>
+                <li data-TagId="1003">民谣</li>
+                <li data-TagId="9108">Electronica</li>
+                <li data-TagId="1072">鼓打贝斯</li>
+                <li data-TagId="1060">回响贝斯</li>
+                <li data-TagId="1153">迪斯科</li>
+                <li data-TagId="1233">硬核</li>
+                <li data-TagId="1000">流行音乐</li>
+                <li data-TagId="8171">游戏电子音乐</li>
+                <li data-TagId="11118">工业音乐</li>
+                <li data-TagId="1350">硬派音乐</li>
+                <li data-TagId="1252">二次元</li>
+                <li data-TagId="9154">高能量舞曲</li>
+                <li data-TagId="1124">电子舞曲</li>
+                <li data-TagId="1244">电子流行</li>
+                <li data-TagId="1028">节奏布鲁斯</li>
+                <li data-TagId="1008">摇滚</li>
+                <li data-TagId="10119">国风</li>
+                <li data-TagId="1022">古典音乐</li>
+                <li data-TagId="1026">儿童音乐</li>
+            </ul>
+        </div>
+        <div class="genre">
+            <div class="genre-items">
+                <img src="./img/crayon.jpg" alt="歌单图片">
+                <div class="genre-info">
+                    <div class="genre-name" data-id="$">歌单名称</div>
+                    <div class="genre-author">歌单作者名称</div>
+                </div>
+            </div>
+        </div>
     `;
 
         // 获取新的元素
@@ -2751,7 +2871,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })();
 
+        // 渲染嘻哈曲风歌单
+        loadGenrePlaylist(1017);
 
+        addGenreItemClickEvents();
+
+        document.querySelectorAll('.genreClassification li').forEach(li => {
+            li.addEventListener('click', () => {
+                const tagId = li.getAttribute('data-TagId');
+                if (tagId) {
+                    loadGenrePlaylist(tagId);
+                }
+            });
+        });
 
         classifiedPlaylist.addEventListener('mouseover', (e) => {
             const item = e.target.closest('.playlist-items');
@@ -2865,6 +2997,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
+
+
+
+
     }
 
     //渲染歌手
